@@ -1,11 +1,47 @@
-from named_entity_recognition.metrics import calculate_score
+from named_entity_recognition.metrics import MetricsStorage
+from seqeval.metrics import performance_measure
 
 import torch
 import torch.nn as nn
 
-def train_epoch(model, criterion, optimizer, data, indexer, device):
+def clear_tags(labels, predictions, idx2tag, batch_element_length):
+    """ this function removes <PAD>, CLS and SEP tags at each sentence
+        and convert both ids of tags and batch elements to SeqEval input format
+        [[first sentence tags], [second sentence tags], ..., [last sentence tags]]"""
+
+    clear_labels = []
+    clear_predictions = []
+    sentence_labels = []
+    sentence_predictions = []
+    sentence_length = 0
+
+    for idx in range(len(labels)):
+        if labels[idx] != 0:
+            sentence_labels.append(idx2tag[labels[idx]])
+            sentence_predictions.append(idx2tag[predictions[idx]])
+            sentence_length += 1
+
+            if sentence_length == batch_element_length:
+                # not including the 0 and the last element of list, because of CLS and SEP tokens
+                clear_labels.append(sentence_labels[1: len(sentence_labels) - 1])
+                clear_predictions.append(sentence_predictions[1: len(sentence_predictions) - 1])
+                sentence_labels = []
+                sentence_predictions = []
+                sentence_length = 0
+        else:
+            if sentence_labels:
+                clear_labels.append(sentence_labels[1: len(sentence_labels) - 1])
+                clear_predictions.append(sentence_predictions[1: len(sentence_predictions) - 1])
+                sentence_labels = []
+                sentence_predictions = []
+            else:
+                pass
+
+    return clear_labels, clear_predictions
+
+def train_epoch(model, criterion, optimizer, data, tag2idx, idx2tag, device, scheduler):
     epoch_loss = 0
-    epoch_score = 0
+    epoch_metrics = MetricsStorage()
 
     model.train()
 
@@ -13,33 +49,49 @@ def train_epoch(model, criterion, optimizer, data, indexer, device):
         tokens = batch[0].to(device)
         tags = batch[1].to(device)
 
+        batch_element_length = len(tags[0])
+
         predictions = model(tokens)
         predictions = predictions.view(-1, predictions.shape[-1])
-        tags_mask = tags != indexer['<PAD>']
+
+        tags_mask = tags != tag2idx['<PAD>']
         tags_mask = tags_mask.view(-1)
         labels = torch.where(tags_mask, tags.view(-1), torch.tensor(criterion.ignore_index).type_as(tags))
 
         loss = criterion(predictions, labels)
 
-        predictions = predictions.argmax(dim=1, keepdim=True)
+        predictions = predictions.argmax(dim=1)
 
-        f_score = calculate_score(predictions, labels)
+        predictions = predictions.cpu().numpy()
+        labels = labels.cpu().numpy()
 
+        # clear <PAD>, CLS and SEP tags from both labels and predictions
+        clear_labels, clear_predictions = clear_tags(labels, predictions, idx2tag, batch_element_length)
+
+        iteration_result = performance_measure(clear_labels, clear_predictions)
+
+        epoch_metrics + iteration_result
         epoch_loss += loss.item()
-        epoch_score += f_score
 
         optimizer.zero_grad()
         loss.backward()
         nn.utils.clip_grad_norm_(model.parameters(), 1)
         optimizer.step()
+        if scheduler:
+            scheduler.step()
         torch.cuda.empty_cache()
 
-    print('Train Loss = {:.5f}, F1-score = {:.3%}'.format(epoch_loss / len(data), epoch_score / len(data)))
+    epoch_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
+    print('Train Loss = {:.5f}, F1-score = {:.3%}, Precision = {:.3%}, Recall = {:.3%}'.format(epoch_loss / len(data),
+                                                                                               epoch_f1_score,
+                                                                                               epoch_precision,
+                                                                                               epoch_recall))
+    epoch_metrics.print_rates()
 
 
-def eval_epoch(model, criterion, data, indexer, device):
+def eval_epoch(model, criterion, data, tag2idx, idx2tag, device):
     epoch_loss = 0
-    epoch_score = 0
+    epoch_metrics = MetricsStorage()
 
     model.eval()
 
@@ -48,55 +100,39 @@ def eval_epoch(model, criterion, data, indexer, device):
             tokens = batch[0].to(device)
             tags = batch[1].to(device)
 
+            batch_element_length = len(tags[0])
+
             predictions = model(tokens)
             predictions = predictions.view(-1, predictions.shape[-1])
-            tags_mask = tags != indexer['<PAD>']
+            tags_mask = tags != tag2idx['<PAD>']
             tags_mask = tags_mask.view(-1)
             labels = torch.where(tags_mask, tags.view(-1), torch.tensor(criterion.ignore_index).type_as(tags))
 
             loss = criterion(predictions, labels)
 
-            predictions = predictions.argmax(dim=1, keepdim=True)
+            predictions = predictions.argmax(dim=1)
 
-            f_score = calculate_score(predictions, labels)
+            predictions = predictions.cpu().numpy()
+            labels = labels.cpu().numpy()
 
+            # clear <PAD>, CLS and SEP tags from both labels and predictions
+            clear_labels, clear_predictions = clear_tags(labels, predictions, idx2tag, batch_element_length)
+
+            iteration_result = performance_measure(clear_labels, clear_predictions)
+
+            epoch_metrics + iteration_result
             epoch_loss += loss.item()
-            epoch_score += f_score
 
-    print('Eval Loss  = {:.5f}, F1-score = {:.3%}'.format(epoch_loss / len(data), epoch_score / len(data)))
-
-
-def test(model, criterion, data, indexer, device):
-    epoch_loss = 0
-    epoch_score = 0
-
-    model.eval()
-
-    with torch.no_grad():
-        for batch in data:
-            tokens = batch[0].to(device)
-            tags = batch[1].to(device)
-
-            predictions = model(tokens)
-            predictions = predictions.view(-1, predictions.shape[-1])
-            tags_mask = tags != indexer['<PAD>']
-            tags_mask = tags_mask.view(-1)
-            labels = torch.where(tags_mask, tags.view(-1), torch.tensor(criterion.ignore_index).type_as(tags))
-
-            loss = criterion(predictions, labels)
-
-            predictions = predictions.argmax(dim=1, keepdim=True)
-
-            f_score = calculate_score(predictions, labels)
-
-            epoch_loss += loss.item()
-            epoch_score += f_score
-
-    print('Test Loss  = {:.5f}, F1-score = {:.3%}'.format(epoch_loss / len(data), epoch_score / len(data)))
+    epoch_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
+    print('Test  Loss = {:.5f}, F1-score = {:.3%}, Precision = {:.3%}, Recall = {:.3%}'.format(epoch_loss / len(data),
+                                                                                               epoch_f1_score,
+                                                                                               epoch_precision,
+                                                                                               epoch_recall))
+    epoch_metrics.print_rates()
 
 
-def train_model(model, criterion, optimizer, train_data, eval_data, indexer, device, epochs=1):
+def train_model(model, criterion, optimizer, train_data, eval_data, tag2idx, idx2tag, device, scheduler, epochs=1):
     for epoch in range(epochs):
         print('Epoch {} / {}'.format(epoch + 1, epochs))
-        train_epoch(model, criterion, optimizer, train_data, indexer, device)
-        eval_epoch(model, criterion, eval_data, indexer, device)
+        train_epoch(model, criterion, optimizer, train_data, tag2idx, idx2tag, device, scheduler)
+        eval_epoch(model, criterion, eval_data, tag2idx, idx2tag, device)

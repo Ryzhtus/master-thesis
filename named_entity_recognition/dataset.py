@@ -3,7 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 from torch.nn.utils.rnn import pad_sequence
 
 
-class ConLL2003Dataset(Dataset):
+class CoNLL2003Dataset(Dataset):
     def __init__(self, sentences, tags, tags_number, tokenizer):
         self.sentences = sentences
         self.sentences_tags = tags
@@ -22,16 +22,23 @@ class ConLL2003Dataset(Dataset):
         words = self.sentences[item]
         tags = self.sentences_tags[item]
 
+        word2tag = dict(zip(words, tags))
+
         tokens = []
+        tokenized_tags = []
+
         for word in words:
             if word not in ('[CLS]', '[SEP]'):
-                tokens.extend(self.tokenizer.tokenize(word))
+                subtokens = self.tokenizer.tokenize(word)
+                for i in range(len(subtokens)):
+                    tokenized_tags.append(word2tag[word])
+                tokens.extend(subtokens)
 
         tokens = ['[CLS]'] + tokens + ['[SEP]']
         tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
 
-        tags = tags + ['<PAD>'] * (len(tokens) - len(tags))
-        tags_ids = [self.tag2idx[tag] for tag in tags]
+        tokenized_tags = ['O'] + tokenized_tags + ['O']
+        tags_ids = [self.tag2idx[tag] for tag in tokenized_tags]
 
         return torch.LongTensor(tokens_ids), torch.LongTensor(tags_ids)
 
@@ -61,6 +68,6 @@ def read_data(filename):
 
 def create_dataset_and_dataloader(filename, batch_size, tokenizer):
     sentences, tags, tags_number = read_data(filename)
-    dataset = ConLL2003Dataset(sentences, tags, tags_number, tokenizer)
+    dataset = CoNLL2003Dataset(sentences, tags, tags_number, tokenizer)
 
     return dataset, DataLoader(dataset, batch_size, num_workers=4, collate_fn=dataset.paddings)
