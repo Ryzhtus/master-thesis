@@ -1,4 +1,4 @@
-from metrics import calculate_score
+from named_entity_recognition.metrics import calculate_score
 
 import torch
 import torch.nn as nn
