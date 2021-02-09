@@ -5,13 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/data/subcorpus_maker.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/ner-with-nonlocal-features.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ner-with-nonlocal-features.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NER_BERT_Baseline.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/NER-BERT-Baseline.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/named_entity_recognition/dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/named_entity_recognition/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/metrics.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/named_entity_recognition/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/run.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/named_entity_recognition/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebooks/BERT-Baseline-Test.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/NER-BERT-Baseline-Test.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,14 +35,14 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
+    <property name="settings.editor.selected.configurable" value="configurable.group.editor" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\shkun\Documents\Учеба\МФТИ\Диссертация\ner-with-nonlocal-features\notebooks" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.subcorpus_maker">
     <configuration name="run" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ner-with-nonlocal-features" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -69,8 +65,35 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="subcorpus_maker" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ner-with-nonlocal-features" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\shkun\AppData\Local\Programs\Python\Python38\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/data" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data/subcorpus_maker.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.run" />
+      <item itemvalue="Python.subcorpus_maker" />
+    </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.subcorpus_maker" />
         <item itemvalue="Python.run" />
       </list>
     </recent_temporary>
@@ -86,7 +109,9 @@
       <workItem from="1608137864033" duration="99000" />
       <workItem from="1608281560633" duration="43000" />
       <workItem from="1611564390859" duration="1398000" />
-      <workItem from="1612809423495" duration="3778000" />
+      <workItem from="1612809423495" duration="4474000" />
+      <workItem from="1612859652012" duration="794000" />
+      <workItem from="1612860522187" duration="9788000" />
     </task>
     <servers />
   </component>
@@ -94,6 +119,7 @@
     <option name="version" value="3" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$subcorpus_maker.coverage" NAME="subcorpus_maker Coverage Results" MODIFIED="1612875924180" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$run.coverage" NAME="run Coverage Results" MODIFIED="1612815609401" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
