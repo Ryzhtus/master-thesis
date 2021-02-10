@@ -1,6 +1,7 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torch.nn.utils.rnn import pad_sequence
+from transformers import BertTokenizer
 
 
 class CoNLL2003Dataset(Dataset):
@@ -71,3 +72,12 @@ def create_dataset_and_dataloader(filename, batch_size, tokenizer):
     dataset = CoNLL2003Dataset(sentences, tags, tags_number, tokenizer)
 
     return dataset, DataLoader(dataset, batch_size, num_workers=4, collate_fn=dataset.paddings)
+
+
+if __name__ == '__main__':
+    TOKENIZER = BertTokenizer.from_pretrained('bert-base-cased', do_lower_case=False)
+
+    sentences, tags, tags_number = read_data("data/conll2003/train.txt")
+    dataset = CoNLL2003Dataset(sentences, tags, tags_number, TOKENIZER)
+
+    print(len(dataset.sentences))

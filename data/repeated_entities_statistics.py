@@ -22,8 +22,10 @@ def convert_to_document(sentences, tags):
     document_tags = []
 
     for sentence, tag in zip(sentences, tags):
+        sentence = ['CLS'] + sentence + ['SEP']
+        tag = ['NONE'] + tag + ['NONE']
 
-        if sentence == ['-DOCSTART-']:
+        if sentence[1: len(sentence) - 1] == ['-DOCSTART-']:
             documents.append([document, document_tags])
             document = []
             document_tags = []
@@ -31,7 +33,7 @@ def convert_to_document(sentences, tags):
             document += sentence
             document_tags += tag
 
-    return documents[1:]  # we do not include the first document because it's empty
+    return documents[1:] # we do not include the first document because it's empty
 
 def get_documents_entities(document):
     counter = collections.Counter()
@@ -47,6 +49,52 @@ def get_documents_entities(document):
             counter[words[idx]] += 1
 
     return entities, entities_tags, counter
+
+def make_sentences_mask(documents):
+    # make a mask for repeated entities in each document
+    sentences = []
+    tags = []
+    masks = []
+
+    for document in documents:
+        sentence = []
+        sentence_tags = []
+        sentence_mask = []
+
+        _, _, document_entities_counter = get_documents_entities(document)
+        repeated_entities = {}
+
+        for key in document_entities_counter.keys():
+            if document_entities_counter[key] >= 2:
+                repeated_entities[key] = document_entities_counter[key]
+
+        repeated_entities = set(repeated_entities.keys())
+
+        words = document[0]
+        words_tags = document[1]
+
+        for idx in range(len(words)):
+            if words[idx] == 'CLS':
+                sentence = []
+                sentence_tags = []
+                sentence_mask = []
+            elif words[idx] == 'SEP':
+                sentences.append(sentence)
+                tags.append(sentence_tags)
+                masks.append(sentence_mask)
+            else:
+                sentence.append(words[idx])
+                sentence_tags.append(words_tags[idx])
+                if repeated_entities:
+                    if words[idx] in repeated_entities:
+                        sentence_mask.append(1)
+                    else:
+                        sentence_mask.append(0)
+                else:
+                    sentence_mask.append(0)
+
+    return sentences, tags, masks
+
 
 def print_statistics():
     print('Amount of documents for each CoNLL subset:')
@@ -90,8 +138,63 @@ def find_repeated_entities(subset, show_repeated_entities=False):
     print()
 
 
+def print_example(subset, id):
+    file_paths = {'train': 'conll2003/train.txt', 'eval': 'conll2003/valid.txt', 'test': 'conll2003/test.txt'}
+    sentences, tags, tags_number = read_data(file_paths[subset])
+    print('Subset:', subset)
+    print('Sentences size:', len(sentences), 'Tags size:', len(tags), 'Tags number:', tags_number)
+    documents = convert_to_document(sentences, tags)
+    sentences, tags, masks = make_sentences_mask(documents)
+    print()
+    print('After processing:')
+    print('Sentences size:', len(sentences), 'Tags size:', len(tags))
+    print()
+    print('Example:')
+    print('Sentence ID={}: length: {}, values: {}'.format(id, len(sentences[id]), sentences[id]))
+    print('Tags     ID={}: length: {}, values: {}'.format(id, len(tags[id]), tags[id]))
+    print('Mask     ID={}: length: {}, values: {}'.format(id, len(masks[id]), masks[id]))
+
+
 if __name__ == '__main__':
     print_statistics()
     find_repeated_entities('train')
     find_repeated_entities('eval')
     find_repeated_entities('test')
+    print_example('train', 100)
+
+
+"""
+OUTPUT: 
+
+Amount of documents for each CoNLL subset:
+Train: 945
+Eval : 215
+Test : 230
+
+Subset: train
+Total number of documents with repeated entities: 873
+Total number of unique repeated entities        : 2676
+Total number of repeated entities in the text   : 16160
+
+Subset: eval
+Total number of documents with repeated entities: 191
+Total number of unique repeated entities        : 953
+Total number of repeated entities in the text   : 4120
+
+Subset: test
+Total number of documents with repeated entities: 202
+Total number of unique repeated entities        : 875
+Total number of repeated entities in the text   : 3724
+
+Subset: train
+Sentences size: 14987 Tags size: 14987 Tags number: 204567
+
+After processing:
+Sentences size: 14042 Tags size: 14042
+
+Example:
+Sentence ID=100: length: 9, values: ['Rabinovich', 'is', 'winding', 'up', 'his', 'term', 'as', 'ambassador', '.']
+Tags     ID=100: length: 9, values: ['B-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+Mask     ID=100: length: 9, values: [1, 0, 0, 0, 0, 0, 0, 0, 0]
+"""
+
