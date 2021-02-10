@@ -6,10 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/named_entity_recognition/dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/named_entity_recognition/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/metrics.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/named_entity_recognition/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/run.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/named_entity_recognition/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_repeated_entities.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_repeated_entities.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,7 +44,7 @@
       <recent name="C:\Users\shkun\Documents\Учеба\МФТИ\Диссертация\ner-with-nonlocal-features\notebooks" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.run">
+  <component name="RunManager" selected="Python tests.pytest in test_repeated_entities.py">
     <configuration name="dataset" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ner-with-nonlocal-features" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -191,11 +188,11 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.pytest in test_repeated_entities.py" />
         <item itemvalue="Python.run" />
         <item itemvalue="Python.dataset" />
         <item itemvalue="Python.repeated_entities_statistics" />
         <item itemvalue="Python tests.pytest for test_repeated_entities.RepeatedEntitiesTest.test_equal_sentences_lengths" />
-        <item itemvalue="Python tests.pytest in test_repeated_entities.py" />
       </list>
     </recent_temporary>
   </component>
@@ -213,7 +210,7 @@
       <workItem from="1612809423495" duration="4474000" />
       <workItem from="1612859652012" duration="794000" />
       <workItem from="1612860522187" duration="10117000" />
-      <workItem from="1612950163497" duration="15518000" />
+      <workItem from="1612950163497" duration="16302000" />
     </task>
     <servers />
   </component>
@@ -230,7 +227,7 @@
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$repeated_entities_statistics.coverage" NAME="repeated_entities_statistics Coverage Results" MODIFIED="1612975248493" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$run.coverage" NAME="run Coverage Results" MODIFIED="1612985863067" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/named_entity_recognition" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$pytest_for_test_repeated_entities_RepeatedEntitiesTest_test_lengths_after_processing.coverage" NAME="pytest for test_repeated_entities.RepeatedEntitiesTest.test_lengths_after_processing Coverage Results" MODIFIED="1612973712236" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
-    <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$pytest_in_test_repeated_entities_py.coverage" NAME="pytest in test_repeated_entities.py Coverage Results" MODIFIED="1612975216495" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$pytest_in_test_repeated_entities_py.coverage" NAME="pytest in test_repeated_entities.py Coverage Results" MODIFIED="1612987910612" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$dataset.coverage" NAME="dataset Coverage Results" MODIFIED="1612975381554" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/named_entity_recognition" />
   </component>
 </project>
