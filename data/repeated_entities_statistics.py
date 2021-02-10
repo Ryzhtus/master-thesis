@@ -22,17 +22,9 @@ def convert_to_document(sentences, tags):
     document_tags = []
 
     for sentence, tag in zip(sentences, tags):
-        """if 'U.S.' == sentence[0]:
-            print(sentence)
-            sentence = ['<START>'] + sentence + ['<END>']
-            print(sentence)
-        else:"""
-
         sentence = ['<START>'] + sentence + ['<END>']
-
         tag = ['NONE'] + tag + ['NONE']
 
-        #if sentence[1: len(sentence) - 1] == ['-DOCSTART-']:
         if '-DOCSTART-' in sentence:
             documents.append([document, document_tags])
             document = []
@@ -41,7 +33,10 @@ def convert_to_document(sentences, tags):
             document += sentence
             document_tags += tag
 
-    return documents  # we do not include the first document because it's empty
+    # append last document, because there is no '-DOCSTART-' or special end marker in text further
+    documents.append([document, document_tags])
+
+    return documents
 
 def get_documents_entities(document):
     counter = collections.Counter()
@@ -164,10 +159,10 @@ def print_example(subset, id):
 
 
 if __name__ == '__main__':
-    #print_statistics()
-    #find_repeated_entities('train')
-    #find_repeated_entities('eval')
-    #find_repeated_entities('test')
+    print_statistics()
+    find_repeated_entities('train')
+    find_repeated_entities('eval')
+    find_repeated_entities('test')
     print_example('train', 100)
 
 

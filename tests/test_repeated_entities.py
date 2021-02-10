@@ -32,8 +32,8 @@ class RepeatedEntitiesTest(unittest.TestCase):
             for original_sentence, processed_sentence in zip(sentences_without_docstart_tag, processed_sentences):
                 self.assertEqual(original_sentence, processed_sentence)
 
-            # self.assertEqual(len(sentences_without_docstart_tag), len(processed_sentences))
-            # self.assertEqual(len(tags_without_docstart_tag), len(processed_tags))
+            self.assertEqual(len(sentences_without_docstart_tag), len(processed_sentences))
+            self.assertEqual(len(tags_without_docstart_tag), len(processed_tags))
 
 
 if __name__ == '__main__':

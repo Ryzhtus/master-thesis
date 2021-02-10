@@ -77,7 +77,7 @@ def create_dataset_and_dataloader(filename, batch_size, tokenizer):
 if __name__ == '__main__':
     TOKENIZER = BertTokenizer.from_pretrained('bert-base-cased', do_lower_case=False)
 
-    sentences, tags, tags_number = read_data("data/conll2003/train.txt")
+    sentences, tags, tags_number = read_data("../data/conll2003/train.txt")
     dataset = CoNLL2003Dataset(sentences, tags, tags_number, TOKENIZER)
 
     print(len(dataset.sentences))
