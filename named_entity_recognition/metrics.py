@@ -1,4 +1,7 @@
-class MetricsStorage():
+from seqeval.metrics import accuracy_score
+
+
+class FMeasureStorage():
     def __init__(self):
         self.true_positive = 0
         self.false_positive = 0
@@ -21,3 +24,16 @@ class MetricsStorage():
         f1_score = 2 * (precision * recall) / (precision + recall)
 
         return f1_score, precision, recall
+
+
+class AccuracyStorage():
+    def __init__(self):
+        self.true_labels = []
+        self.pred_labels = []
+
+    def __add__(self, labels: dict):
+        self.true_labels.extend(labels['true'])
+        self.pred_labels.extend(labels['pred'])
+
+    def report(self):
+        return accuracy_score(self.true_labels, self.pred_labels)

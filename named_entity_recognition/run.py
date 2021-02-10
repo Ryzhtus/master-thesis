@@ -1,4 +1,5 @@
 from named_entity_recognition.dataset import CoNLL2003Dataset, read_data, create_dataset_and_dataloader
+from named_entity_recognition.dataset import convert_to_document, make_sentences_mask
 from named_entity_recognition.model import BertNER
 from named_entity_recognition.train import train_model, eval_epoch
 
@@ -15,8 +16,10 @@ DEVICE = 'cuda' if torch.cuda.is_available else 'cpu'
 EPOCHS = 4
 BATCH_SIZE = 16
 
-sentences, tags, tags_number = read_data("../data/conll2003/train.txt")
-dataset = CoNLL2003Dataset(sentences, tags, tags_number, TOKENIZER)
+sentences, tags = read_data("../data/conll2003/train.txt")
+documents = convert_to_document(sentences, tags)
+sentences, tags, masks = make_sentences_mask(documents)
+dataset = CoNLL2003Dataset(sentences, tags, masks, TOKENIZER)
 
 train_dataset, train_dataloader = create_dataset_and_dataloader("../data/conll2003/train.txt", BATCH_SIZE, TOKENIZER)
 eval_dataset, eval_dataloader = create_dataset_and_dataloader("../data/conll2003/valid.txt", BATCH_SIZE, TOKENIZER)
