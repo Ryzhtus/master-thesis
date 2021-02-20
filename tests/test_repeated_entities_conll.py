@@ -1,5 +1,5 @@
 import unittest
-from data.repeated_entities_statistics import read_data, convert_to_document, make_sentences_mask
+from data.repeated_entities_statistics_conll import read_data, convert_to_document, make_sentences_mask
 
 
 class RepeatedEntitiesTest(unittest.TestCase):

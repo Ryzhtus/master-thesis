@@ -163,7 +163,7 @@ if __name__ == '__main__':
     find_repeated_entities('train')
     find_repeated_entities('eval')
     find_repeated_entities('test')
-    print_example('train', 100)
+    print_example('train', 0)
 
 
 """

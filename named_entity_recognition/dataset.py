@@ -4,7 +4,7 @@ from torch.utils.data import Dataset, DataLoader
 from torch.nn.utils.rnn import pad_sequence
 
 
-class CoNLL2003Dataset(Dataset):
+class DatasetNER(Dataset):
     def __init__(self, sentences, tags, repeated_entities_masks, tokenizer):
         self.sentences = sentences
         self.sentences_tags = tags
@@ -59,7 +59,7 @@ class CoNLL2003Dataset(Dataset):
         return tokens, tags, masks
 
 
-def read_data(filename):
+def read_conll(filename):
     rows = open(filename, 'r').read().strip().split("\n\n")
     sentences, sentences_tags = [], []
 
@@ -70,6 +70,31 @@ def read_data(filename):
         sentences_tags.append(tags)
 
     return sentences, sentences_tags
+
+def read_ontonotes(filename):
+    rows = open(filename, 'r').read().strip().split('\n\n')
+    documents, documents_tags, sentences, sentences_tags = [], [], [], []
+
+    for document in rows:
+        words = [line.split()[0] for line in document.splitlines()]
+        tags = [line.split()[-1] for line in document.splitlines()]
+        sentence = []
+        sentence_tags = []
+        for idx in range(len(words)):
+            if words[idx] in ['.', '?', '!']:
+                sentence.append(words[idx])
+                sentence_tags.append(tags[idx])
+                sentences.append(sentence)
+                sentences_tags.append(sentence_tags)
+                sentence = []
+                sentence_tags = []
+            else:
+                sentence.append(words[idx])
+                sentence_tags.append(tags[idx])
+        documents.append(words)
+        documents_tags.append(tags)
+
+    return documents, documents_tags, sentences, sentences_tags
 
 
 def convert_to_document(sentences, tags):
@@ -157,10 +182,15 @@ def make_sentences_mask(documents):
     return sentences, tags, masks
 
 
-def create_dataset_and_dataloader(filename, batch_size, tokenizer):
-    sentences, tags = read_data(filename)
-    documents = convert_to_document(sentences, tags)
-    sentences, tags, masks = make_sentences_mask(documents)
-    dataset = CoNLL2003Dataset(sentences, tags, masks, tokenizer)
+def create_dataset_and_dataloader(dataset_name, filename, batch_size, tokenizer):
+    if dataset_name == 'conll':
+        sentences, tags = read_conll(filename)
+        documents = convert_to_document(sentences, tags)
+        sentences, tags, masks = make_sentences_mask(documents)
+        dataset = DatasetNER(sentences, tags, masks, tokenizer)
+    elif dataset_name == 'ontonotes':
+        documents, documents_tags, sentences, sentences_tags = read_ontonotes(filename)
+        sentences, tags, masks = make_sentences_mask(documents, documents_tags)
+        dataset = DatasetNER(sentences, tags, masks, tokenizer)
 
     return dataset, DataLoader(dataset, batch_size, num_workers=4, collate_fn=dataset.paddings)
