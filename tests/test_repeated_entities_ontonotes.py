@@ -1,12 +1,12 @@
 import unittest
-from data.repeated_entities_statistics_ontonotes import read_data, make_sentences_mask
+from data.repeated_entities_statistics_ontonotes import read_document, make_sentences_mask
 
 
 class RepeatedEntitiesTest(unittest.TestCase):
     def test_lengths_after_processing(self):
         paths = ['../data/ontonotes/onto.train.ner', '../data/ontonotes/onto.development.ner', '../data/ontonotes/onto.test.ner']
         for filepath in paths:
-            documents, documents_tags = read_data(filepath)
+            documents, documents_tags = read_document(filepath)
 
             processed_sentences, processed_tags, masks = make_sentences_mask(documents, documents_tags)
 

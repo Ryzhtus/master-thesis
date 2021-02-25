@@ -3,6 +3,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from torch.nn.utils.rnn import pad_sequence
 
+from named_entity_recognition.reader import ReaderCoNLL, ReaderOntonotes
 
 class DatasetNER(Dataset):
     def __init__(self, sentences, tags, repeated_entities_masks, tokenizer):
@@ -59,138 +60,17 @@ class DatasetNER(Dataset):
         return tokens, tags, masks
 
 
-def read_conll(filename):
-    rows = open(filename, 'r').read().strip().split("\n\n")
-    sentences, sentences_tags = [], []
-
-    for sentence in rows:
-        words = [line.split()[0] for line in sentence.splitlines()]
-        tags = [line.split()[-1] for line in sentence.splitlines()]
-        sentences.append(words)
-        sentences_tags.append(tags)
-
-    return sentences, sentences_tags
-
-def read_ontonotes(filename):
-    rows = open(filename, 'r').read().strip().split('\n\n')
-    documents, documents_tags, sentences, sentences_tags = [], [], [], []
-
-    for document in rows:
-        words = [line.split()[0] for line in document.splitlines()]
-        tags = [line.split()[-1] for line in document.splitlines()]
-        sentence = []
-        sentence_tags = []
-        for idx in range(len(words)):
-            if words[idx] in ['.', '?', '!']:
-                sentence.append(words[idx])
-                sentence_tags.append(tags[idx])
-                sentences.append(sentence)
-                sentences_tags.append(sentence_tags)
-                sentence = []
-                sentence_tags = []
-            else:
-                sentence.append(words[idx])
-                sentence_tags.append(tags[idx])
-        documents.append(words)
-        documents_tags.append(tags)
-
-    return documents, documents_tags, sentences, sentences_tags
-
-
-def convert_to_document(sentences, tags):
-    documents = []
-    document = []
-    document_tags = []
-
-    for sentence, tag in zip(sentences, tags):
-        sentence = ['<START>'] + sentence + ['<END>']
-        tag = ['NONE'] + tag + ['NONE']
-
-        if '-DOCSTART-' in sentence:
-            documents.append([document, document_tags])
-            document = []
-            document_tags = []
-        else:
-            document += sentence
-            document_tags += tag
-
-    # append last document, because there is no '-DOCSTART-' or special end marker in text further
-    documents.append([document, document_tags])
-
-    return documents
-
-
-def get_documents_entities(document):
-    counter = collections.Counter()
-    words = document[0]
-    tags = document[1]
-
-    entities = []
-    entities_tags = []
-    for idx in range(len(tags)):
-        if tags[idx][0] == 'B' or tags[idx][0] == 'I':
-            entities.append([idx, words[idx]])
-            entities_tags.append([idx, tags[idx]])
-            counter[words[idx]] += 1
-
-    return entities, entities_tags, counter
-
-
-def make_sentences_mask(documents):
-    # make a mask for repeated entities in each document
-    sentences = []
-    tags = []
-    masks = []
-
-    for document in documents:
-        sentence = []
-        sentence_tags = []
-        sentence_mask = []
-
-        _, _, document_entities_counter = get_documents_entities(document)
-        repeated_entities = {}
-
-        for key in document_entities_counter.keys():
-            if document_entities_counter[key] >= 2:
-                repeated_entities[key] = document_entities_counter[key]
-
-        repeated_entities = set(repeated_entities.keys())
-
-        words = document[0]
-        words_tags = document[1]
-
-        for idx in range(len(words)):
-            if words[idx] == '<START>':
-                sentence = []
-                sentence_tags = []
-                sentence_mask = []
-            elif words[idx] == '<END>':
-                sentences.append(sentence)
-                tags.append(sentence_tags)
-                masks.append(sentence_mask)
-            else:
-                sentence.append(words[idx])
-                sentence_tags.append(words_tags[idx])
-                if repeated_entities:
-                    if words[idx] in repeated_entities:
-                        sentence_mask.append(1)
-                    else:
-                        sentence_mask.append(-1)
-                else:
-                    sentence_mask.append(-1)
-
-    return sentences, tags, masks
-
-
 def create_dataset_and_dataloader(dataset_name, filename, batch_size, tokenizer):
     if dataset_name == 'conll':
-        sentences, tags = read_conll(filename)
-        documents = convert_to_document(sentences, tags)
-        sentences, tags, masks = make_sentences_mask(documents)
+        reader = ReaderCoNLL()
+        sentences, tags = reader.read(filename)
+        documents = reader.convert_to_document(sentences, tags)
+        sentences, tags, masks = reader.make_sentences_mask(documents)
         dataset = DatasetNER(sentences, tags, masks, tokenizer)
-    elif dataset_name == 'ontonotes':
-        documents, documents_tags, sentences, sentences_tags = read_ontonotes(filename)
-        sentences, tags, masks = make_sentences_mask(documents, documents_tags)
-        dataset = DatasetNER(sentences, tags, masks, tokenizer)
+        return dataset, DataLoader(dataset, batch_size, num_workers=4, collate_fn=dataset.paddings)
 
-    return dataset, DataLoader(dataset, batch_size, num_workers=4, collate_fn=dataset.paddings)
+    if dataset_name == 'ontonotes':
+        reader = ReaderOntonotes()
+        sentences, tags, masks = reader.get_sentences(filename)
+        dataset = DatasetNER(sentences, tags, masks, tokenizer)
+        return dataset, DataLoader(dataset, batch_size, num_workers=4, collate_fn=dataset.paddings)
