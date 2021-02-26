@@ -29,7 +29,7 @@ def get_sentences(path):
     for _, _, files in os.walk(path):
         for filename in files:
             print(filename)
-            sentences, sentences_tags = read_document(path + '/' +filename)
+            sentences, sentences_tags = read_document(path + '/' + filename)
 
             documents += sentences
             documents_tags += sentences_tags
@@ -63,12 +63,47 @@ def get_documents_entities(document, document_tags):
             sentences_entities = [' '.join(entity) for entity in sentences_entities]
             for entity in sentences_entities:
                 counter[entity] += 1
-            print(sentence)
-            print(tags)
-            print(sentences_entities)
-            print('---------------------')
+
     return counter
 
-if __name__ == '__main__':
-    documents, documents_tags = get_sentences('ontonotes/train')
+def print_statistics(subset):
+    paths = {'train': 'ontonotes/train', 'dev': 'ontonotes/development', 'test': 'ontonotes/test'}
+    path = paths[subset]
 
+    entities_number = 0
+    repeated_entities_number = 0
+    repeated_entities_set = set()
+    documents_number = 0
+    documents_with_repeated_entities_number = 0
+
+    for _, _, files in os.walk(path):
+        for filename in files:
+            document, document_tags = read_document(path + '/' + filename)
+            document_entities_counter = get_documents_entities(document, document_tags)
+            documents_number += 1
+            repeated_entities = {}
+            for key in document_entities_counter.keys():
+                if document_entities_counter[key] >= 2:
+                    repeated_entities[key] = document_entities_counter[key]
+            entities_number += sum(document_entities_counter.values())
+            if repeated_entities:
+                documents_with_repeated_entities_number += 1
+                repeated_entities_set.update(set(repeated_entities.keys()))
+                repeated_entities_number += sum(repeated_entities.values())
+
+    print('Subset:', subset)
+    print('Total number of documents                       : {}'.format(documents_number))
+    print('Total number of documents with repeated entities: {}'.format(documents_with_repeated_entities_number))
+    print('Total number of entities                        : {}'.format(entities_number))
+    print('Total number of repeated entities in the text   : {}'.format(repeated_entities_number))
+    print('Total number of unique repeated entities        : {}'.format(len(repeated_entities_set)))
+    print('Repeated entities ratio                         : {:.2%}'.format(repeated_entities_number / entities_number))
+    print()
+
+
+
+if __name__ == '__main__':
+    # documents, documents_tags = get_sentences('ontonotes/train')
+    print_statistics('train')
+    print_statistics('dev')
+    print_statistics('test')

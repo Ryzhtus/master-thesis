@@ -117,7 +117,7 @@ class ReaderOntonotes():
                 sentence.append(data[0])
                 tags.append(data[1])
         document = [sentence for sentence in document if sentence != []]
-        document_tags = [sentence for sentence in document if sentence != []]
+        document_tags = [tags for tags in document_tags if tags != []]
         document_masks = [[0] * len(sentence) for sentence in document]
         return document, document_tags, document_masks
 
@@ -128,7 +128,6 @@ class ReaderOntonotes():
 
         for _, _, files in os.walk(path):
             for filename in files:
-                print(filename)
                 sentences, sentences_tags, sentences_masks = self.read_document(path + '/' + filename)
 
                 documents += sentences
@@ -140,6 +139,6 @@ class ReaderOntonotes():
 
 if __name__ == '__main__':
     reader = ReaderOntonotes()
-    documents, documents_tags, documents_masks = reader.get_sentences('../data/ontonotes/train')
-    #for i in range(10):
-    #    print(len(documents[i]), documents[i], len(documents_masks[i]), documents_masks[i])
+    documents, documents_tags, documents_masks = reader.get_sentences('../data/ontonotes/development')
+    for i in range(10):
+        print(len(documents[i]), documents[i], len(documents_tags[i]), documents_tags[i])
