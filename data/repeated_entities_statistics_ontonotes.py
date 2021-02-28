@@ -19,7 +19,7 @@ def read_document(filename):
             sentence.append(data[0])
             tags.append(data[1])
     document = [sentence for sentence in document if sentence != []]
-    document_tags = [sentence for sentence in document if sentence != []]
+    document_tags = [tags for tags in document_tags if tags != []]
     return document, document_tags
 
 def get_sentences(path):
@@ -66,6 +66,21 @@ def get_documents_entities(document, document_tags):
 
     return counter
 
+def make_sentence_mask(document, counter):
+    masks = []
+    for sentence in document:
+        sentence_mask = [0 for x in range(len(sentence))]
+        for key in list(counter.keys()):
+            entity = key
+            window_size = len(entity.split(' '))
+            for window_start in range(0, len(sentence) - window_size):
+                if ' '.join(sentence[window_start: window_start + window_size]) == entity:
+                    for idx in range(window_start, window_start + window_size):
+                        sentence_mask[idx] = 1
+        masks.append(sentence_mask)
+
+    return masks
+
 def print_statistics(subset):
     paths = {'train': 'ontonotes/train', 'dev': 'ontonotes/development', 'test': 'ontonotes/test'}
     path = paths[subset]
@@ -104,6 +119,20 @@ def print_statistics(subset):
 
 if __name__ == '__main__':
     # documents, documents_tags = get_sentences('ontonotes/train')
-    print_statistics('train')
-    print_statistics('dev')
-    print_statistics('test')
+    #print_statistics('train')
+    #print_statistics('dev')
+    #print_statistics('test')
+    document, document_tags = read_document('ontonotes/train/train_document0.txt')
+    document_entities_counter = get_documents_entities(document, document_tags)
+    repeated_entities = {}
+    for key in document_entities_counter.keys():
+        if document_entities_counter[key] >= 2:
+            repeated_entities[key] = document_entities_counter[key]
+    print(list(repeated_entities.keys()))
+    masks = make_sentence_mask(document, repeated_entities)
+
+    for sentence, tags, mask in zip(document, document_tags, masks):
+        print(len(sentence), sentence)
+        print(len(tags), tags)
+        print(len(mask), mask)
+        print()

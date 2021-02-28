@@ -7,7 +7,6 @@
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/repeated_entities_statistics_ontonotes.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/repeated_entities_statistics_ontonotes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/named_entity_recognition/reader.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/reader.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,7 +54,7 @@
       <recent name="C:\Users\shkun\Documents\Учеба\МФТИ\Диссертация\ner-with-nonlocal-features\tests" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.reader">
+  <component name="RunManager" selected="Python.repeated_entities_statistics_ontonotes">
     <configuration name="ontonotes_reader" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ner-with-nonlocal-features" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -161,8 +160,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.reader" />
         <item itemvalue="Python.repeated_entities_statistics_ontonotes" />
+        <item itemvalue="Python.reader" />
         <item itemvalue="Python tests.pytest in test_repeated_entities_ontonotes.py" />
         <item itemvalue="Python.ontonotes_reader" />
         <item itemvalue="Shell Script.setup_training.sh" />
@@ -202,7 +201,8 @@
       <workItem from="1614067761024" duration="1749000" />
       <workItem from="1614184223744" duration="2176000" />
       <workItem from="1614243035760" duration="13672000" />
-      <workItem from="1614323933038" duration="2070000" />
+      <workItem from="1614323933038" duration="3420000" />
+      <workItem from="1614504487609" duration="6536000" />
     </task>
     <servers />
   </component>
@@ -215,7 +215,7 @@
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$ontonotes_to_conll.coverage" NAME="ontonotes_to_conll Coverage Results" MODIFIED="1613137829685" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$subcorpus_maker.coverage" NAME="subcorpus_maker Coverage Results" MODIFIED="1612875924180" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$repeated_entities_statistics.coverage" NAME="repeated_entities_statistics Coverage Results" MODIFIED="1613046615032" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
-    <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$repeated_entities_statistics_ontonotes.coverage" NAME="repeated_entities_statistics_ontonotes Coverage Results" MODIFIED="1614324638690" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
+    <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$repeated_entities_statistics_ontonotes.coverage" NAME="repeated_entities_statistics_ontonotes Coverage Results" MODIFIED="1614533422455" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$pytest_for_test_repeated_entities_RepeatedEntitiesTest_test_lengths_after_processing.coverage" NAME="pytest for test_repeated_entities.RepeatedEntitiesTest.test_lengths_after_processing Coverage Results" MODIFIED="1612973712236" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$ontonotes_to_conll__1_.coverage" NAME="ontonotes_to_conll (1) Coverage Results" MODIFIED="1613137897656" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ontonotes" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$dataset.coverage" NAME="dataset Coverage Results" MODIFIED="1612975381554" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/named_entity_recognition" />
