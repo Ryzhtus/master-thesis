@@ -37,12 +37,12 @@ class ReaderCoNLL():
 
         return documents, documents_tags
 
-    def get_sentences(self, path):
+    def get_sentences(self, filename):
         output_documents = []
         output_documents_tags = []
         documents_masks = []
 
-        sentences, sentences_tags = self.read_document(path)
+        sentences, sentences_tags = self.read_document(filename)
         documents, documents_tags = self.convert_to_document(sentences, sentences_tags)
 
         for document, document_tags in zip(documents, documents_tags):
