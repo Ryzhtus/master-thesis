@@ -1,12 +1,12 @@
 import unittest
-from data.repeated_entities_statistics_conll import read_data, convert_to_document, make_sentences_mask
+from data.repeated_entities_statistics_conll import read_document, convert_to_document, make_sentences_mask
 
 
 class RepeatedEntitiesTest(unittest.TestCase):
     def test_lengths_after_processing(self):
         paths = ['../data/conll2003/train.txt', '../data/conll2003/valid.txt', '../data/conll2003/test.txt']
         for filepath in paths:
-            sentences, tags, tags_number = read_data(filepath)
+            sentences, tags, tags_number = read_document(filepath)
 
             documents = convert_to_document(sentences, tags)
             processed_sentences, processed_tags, masks = make_sentences_mask(documents)
@@ -17,7 +17,7 @@ class RepeatedEntitiesTest(unittest.TestCase):
     def test_equal_sentences(self):
         paths = ['../data/conll2003/train.txt', '../data/conll2003/valid.txt', '../data/conll2003/test.txt']
         for filepath in paths:
-            sentences, tags, tags_number = read_data(filepath)
+            sentences, tags, tags_number = read_document(filepath)
             sentences_without_docstart_tag = []
             tags_without_docstart_tag = []
 
@@ -35,7 +35,7 @@ class RepeatedEntitiesTest(unittest.TestCase):
     def test_equal_sentences_lengths(self):
         paths = ['../data/conll2003/train.txt', '../data/conll2003/valid.txt', '../data/conll2003/test.txt']
         for filepath in paths:
-            sentences, tags, tags_number = read_data(filepath)
+            sentences, tags, tags_number = read_document(filepath)
             sentences_without_docstart_tag = []
             tags_without_docstart_tag = []
 

@@ -28,7 +28,6 @@ def get_sentences(path):
 
     for _, _, files in os.walk(path):
         for filename in files:
-            print(filename)
             sentences, sentences_tags = read_document(path + '/' + filename)
 
             documents += sentences
@@ -119,20 +118,6 @@ def print_statistics(subset):
 
 if __name__ == '__main__':
     # documents, documents_tags = get_sentences('ontonotes/train')
-    #print_statistics('train')
-    #print_statistics('dev')
-    #print_statistics('test')
-    document, document_tags = read_document('ontonotes/train/train_document0.txt')
-    document_entities_counter = get_documents_entities(document, document_tags)
-    repeated_entities = {}
-    for key in document_entities_counter.keys():
-        if document_entities_counter[key] >= 2:
-            repeated_entities[key] = document_entities_counter[key]
-    print(list(repeated_entities.keys()))
-    masks = make_sentence_mask(document, repeated_entities)
-
-    for sentence, tags, mask in zip(document, document_tags, masks):
-        print(len(sentence), sentence)
-        print(len(tags), tags)
-        print(len(mask), mask)
-        print()
+    print_statistics('train')
+    print_statistics('dev')
+    print_statistics('test')

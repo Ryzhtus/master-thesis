@@ -3,7 +3,7 @@ import os
 
 
 class ReaderCoNLL():
-    def read(self, filename):
+    def read_document(self, filename):
         rows = open(filename, 'r').read().strip().split("\n\n")
         sentences, sentences_tags = [], []
 
@@ -17,85 +17,93 @@ class ReaderCoNLL():
 
     def convert_to_document(self, sentences, tags):
         documents = []
+        documents_tags = []
         document = []
         document_tags = []
 
         for sentence, tag in zip(sentences, tags):
-            sentence = ['<START>'] + sentence + ['<END>']
-            tag = ['NONE'] + tag + ['NONE']
-
             if '-DOCSTART-' in sentence:
-                documents.append([document, document_tags])
+                documents.append(document)
+                documents_tags.append(document_tags)
                 document = []
                 document_tags = []
             else:
-                document += sentence
-                document_tags += tag
+                document.append(sentence)
+                document_tags.append(tag)
 
         # append last document, because there is no '-DOCSTART-' or special end marker in text further
-        documents.append([document, document_tags])
+        documents.append(document)
+        documents_tags.append(document_tags)
 
-        return documents
+        return documents, documents_tags
 
-    def get_documents_entities(self, document):
-        counter = collections.Counter()
-        words = document[0]
-        tags = document[1]
+    def get_sentences(self, path):
+        output_documents = []
+        output_documents_tags = []
+        documents_masks = []
 
-        entities = []
-        entities_tags = []
-        for idx in range(len(tags)):
-            if tags[idx][0] == 'B' or tags[idx][0] == 'I':
-                entities.append([idx, words[idx]])
-                entities_tags.append([idx, tags[idx]])
-                counter[words[idx]] += 1
+        sentences, sentences_tags = self.read_document(path)
+        documents, documents_tags = self.convert_to_document(sentences, sentences_tags)
 
-        return entities, entities_tags, counter
-
-    def make_sentences_mask(self, documents):
-        # make a mask for repeated entities in each document
-        sentences = []
-        tags = []
-        masks = []
-
-        for document in documents:
-            sentence = []
-            sentence_tags = []
-            sentence_mask = []
-
-            _, _, document_entities_counter = self.get_documents_entities(document)
+        for document, document_tags in zip(documents, documents_tags):
+            document_entities_counter = self.get_documents_entities(document, document_tags)
             repeated_entities = {}
-
             for key in document_entities_counter.keys():
                 if document_entities_counter[key] >= 2:
                     repeated_entities[key] = document_entities_counter[key]
 
-            repeated_entities = set(repeated_entities.keys())
+            documents_masks += self.make_sentence_mask(document, repeated_entities)
 
-            words = document[0]
-            words_tags = document[1]
+        output_documents += sentences
+        output_documents_tags += sentences_tags
 
-            for idx in range(len(words)):
-                if words[idx] == '<START>':
-                    sentence = []
-                    sentence_tags = []
-                    sentence_mask = []
-                elif words[idx] == '<END>':
-                    sentences.append(sentence)
-                    tags.append(sentence_tags)
-                    masks.append(sentence_mask)
-                else:
-                    sentence.append(words[idx])
-                    sentence_tags.append(words_tags[idx])
-                    if repeated_entities:
-                        if words[idx] in repeated_entities:
-                            sentence_mask.append(1)
-                        else:
-                            sentence_mask.append(-1)
+        return sentences, sentences_tags, documents_masks
+
+    def get_documents_entities(self, document, document_tags):
+        counter = collections.Counter()
+
+        for sentence, tags in zip(document, document_tags):
+            sentence_entity = []
+            sentences_entities = []
+            entity = []
+            entity_tags = []
+            entity_ids = []
+            for idx in range(len(sentence)):
+                if tags[idx] != 'O':
+                    entity.append(sentence[idx])
+                    entity_tags.append(tags[idx])
+                    entity_ids.append(idx)
+
+            if entity:
+                sentence_entity.append(entity[0])
+                for idx in range(1, len(entity)):
+                    if entity_tags[idx][0] == 'B':
+                        sentences_entities.append(sentence_entity)
+                        sentence_entity = [entity[idx]]
                     else:
-                        sentence_mask.append(-1)
+                        sentence_entity.append(entity[idx])
+                sentences_entities.append(sentence_entity)
 
-        return sentences, tags, masks
+                sentences_entities = [' '.join(entity) for entity in sentences_entities]
+                for entity in sentences_entities:
+                    counter[entity] += 1
+
+        return counter
+
+    def make_sentence_mask(self, document, counter):
+        masks = []
+        for sentence in document:
+            sentence_mask = [-1 for x in range(len(sentence))]
+            for key in list(counter.keys()):
+                entity = key
+                window_size = len(entity.split(' '))
+                for window_start in range(0, len(sentence) - window_size):
+                    if ' '.join(sentence[window_start: window_start + window_size]) == entity:
+                        for idx in range(window_start, window_start + window_size):
+                            sentence_mask[idx] = 1
+            masks.append(sentence_mask)
+
+        return masks
 
 
 class ReaderOntonotes():
@@ -192,9 +200,16 @@ class ReaderOntonotes():
 
 
 if __name__ == '__main__':
-    reader = ReaderOntonotes()
+    """reader = ReaderOntonotes()
     documents, documents_tags, documents_masks = reader.get_sentences('../data/ontonotes/development')
     for i in range(10):
         print(len(documents[i]), documents[i])
         print(len(documents_tags[i]), documents_tags[i])
-        print(len(documents_masks[i]), documents_masks[i])
+        print(len(documents_masks[i]), documents_masks[i])"""
+
+    reader = ReaderCoNLL()
+    documents, documents_tags, documents_masks = reader.get_sentences('../data/conll2003/train.txt')
+    for i in range(10):
+        print(len(documents[i]), documents[i])
+        print(len(documents_tags[i]), documents_tags[i])
+        print(len(documents_masks[i + 1]), documents_masks[i + 1])

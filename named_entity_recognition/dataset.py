@@ -63,8 +63,8 @@ class DatasetNER(Dataset):
 def create_dataset_and_dataloader(dataset_name, filename, batch_size, tokenizer):
     if dataset_name == 'conll':
         reader = ReaderCoNLL()
-        sentences, tags = reader.read(filename)
-        documents = reader.convert_to_document(sentences, tags)
+        sentences, sentences_tags = reader.read_document(path)
+        documents, documents_tags = reader.convert_to_document(sentences, sentences_tags)
         sentences, tags, masks = reader.make_sentences_mask(documents)
         dataset = DatasetNER(sentences, tags, masks, tokenizer)
         return dataset, DataLoader(dataset, batch_size, num_workers=4, collate_fn=dataset.paddings)

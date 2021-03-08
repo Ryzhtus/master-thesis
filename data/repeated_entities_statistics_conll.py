@@ -2,7 +2,7 @@
 import collections
 
 
-def read_data(filename):
+def read_document(filename):
     rows = open(filename, 'r').read().strip().split("\n\n")
     sentences, sentences_tags = [], []
 
@@ -12,159 +12,115 @@ def read_data(filename):
         sentences.append(words)
         sentences_tags.append(tags)
 
-    tags_number = sum([len(tag) for tag in sentences_tags])
-
-    return sentences, sentences_tags, tags_number
+    return sentences, sentences_tags
 
 def convert_to_document(sentences, tags):
     documents = []
+    documents_tags = []
     document = []
     document_tags = []
 
     for sentence, tag in zip(sentences, tags):
-        sentence = ['<START>'] + sentence + ['<END>']
-        tag = ['NONE'] + tag + ['NONE']
-
         if '-DOCSTART-' in sentence:
-            documents.append([document, document_tags])
+            documents.append(document)
+            documents_tags.append(document_tags)
             document = []
             document_tags = []
         else:
-            document += sentence
-            document_tags += tag
+            document.append(sentence)
+            document_tags.append(tag)
 
     # append last document, because there is no '-DOCSTART-' or special end marker in text further
-    documents.append([document, document_tags])
+    documents.append(document)
+    documents_tags.append(document_tags)
 
-    return documents
+    return documents, documents_tags
 
-def get_documents_entities(document):
+def get_documents_entities(document, document_tags):
     counter = collections.Counter()
-    words = document[0]
-    tags = document[1]
 
-    entities = []
-    entities_tags = []
-    for idx in range(len(tags)):
-        if tags[idx][0] == 'B' or tags[idx][0] == 'I':
-            entities.append([idx, words[idx]])
-            entities_tags.append([idx, tags[idx]])
-            counter[words[idx]] += 1
+    for sentence, tags in zip(document, document_tags):
+        sentence_entity = []
+        sentences_entities = []
+        entity = []
+        entity_tags = []
+        entity_ids = []
+        for idx in range(len(sentence)):
+            if tags[idx] != 'O':
+                entity.append(sentence[idx])
+                entity_tags.append(tags[idx])
+                entity_ids.append(idx)
 
-    return entities, entities_tags, counter
-
-def make_sentences_mask(documents):
-    # make a mask for repeated entities in each document
-    sentences = []
-    tags = []
-    masks = []
-
-    for document in documents:
-        sentence = []
-        sentence_tags = []
-        sentence_mask = []
-
-        _, _, document_entities_counter = get_documents_entities(document)
-        repeated_entities = {}
-
-        for key in document_entities_counter.keys():
-            if document_entities_counter[key] >= 2:
-                repeated_entities[key] = document_entities_counter[key]
-
-        repeated_entities = set(repeated_entities.keys())
-
-        words = document[0]
-        words_tags = document[1]
-
-        for idx in range(len(words)):
-            if words[idx] == '<START>':
-                sentence = []
-                sentence_tags = []
-                sentence_mask = []
-            elif words[idx] == '<END>':
-                sentences.append(sentence)
-                tags.append(sentence_tags)
-                masks.append(sentence_mask)
-            else:
-                sentence.append(words[idx])
-                sentence_tags.append(words_tags[idx])
-                if repeated_entities:
-                    if words[idx] in repeated_entities:
-                        sentence_mask.append(1)
-                    else:
-                        sentence_mask.append(0)
+        if entity:
+            sentence_entity.append(entity[0])
+            for idx in range(1, len(entity)):
+                if entity_tags[idx][0] == 'B':
+                    sentences_entities.append(sentence_entity)
+                    sentence_entity = [entity[idx]]
                 else:
-                    sentence_mask.append(0)
+                    sentence_entity.append(entity[idx])
+            sentences_entities.append(sentence_entity)
 
-    return sentences, tags, masks
+            sentences_entities = [' '.join(entity) for entity in sentences_entities]
+            for entity in sentences_entities:
+                counter[entity] += 1
 
+    return counter
 
-def print_statistics():
-    print('Amount of documents for each CoNLL subset:')
-    train_sentences, train_tags, train_tags_number = read_data('conll2003/train.txt')
-    train_documents = convert_to_document(train_sentences, train_tags)
-    print('Train:', len(train_documents))
+def make_sentence_mask(document, counter):
+    masks = []
+    for sentence in document:
+        sentence_mask = [0 for x in range(len(sentence))]
+        for key in list(counter.keys()):
+            entity = key
+            window_size = len(entity.split(' '))
+            for window_start in range(0, len(sentence) - window_size):
+                if ' '.join(sentence[window_start: window_start + window_size]) == entity:
+                    for idx in range(window_start, window_start + window_size):
+                        sentence_mask[idx] = 1
+        masks.append(sentence_mask)
 
-    eval_sentences, eval_tags, eval_tags_number = read_data('conll2003/valid.txt')
-    eval_documents = convert_to_document(eval_sentences, eval_tags)
-    print('Eval :', len(eval_documents))
+    return masks
 
-    test_sentences, test_tags, test_tags_number = read_data('conll2003/test.txt')
-    test_documents = convert_to_document(test_sentences, test_tags)
-    print('Test :', len(test_documents))
-    print()
+def print_statistics(subset):
+    paths = {'train': 'conll2003/train.txt', 'dev': 'conll2003/valid.txt', 'test': 'conll2003/test.txt'}
+    path = paths[subset]
 
-def find_repeated_entities(subset, show_repeated_entities=False):
-    file_paths = {'train': 'conll2003/train.txt', 'eval': 'conll2003/valid.txt', 'test': 'conll2003/test.txt'}
-    sentences, tags, tags_number = read_data(file_paths[subset])
-    train_documents = convert_to_document(sentences, tags)
+    entities_number = 0
+    repeated_entities_number = 0
+    repeated_entities_set = set()
     documents_number = 0
-    entities_set = set()
-    entities_sum = 0
-    for document_id, document in enumerate(train_documents):
-        document_entities, document_entities_tags, document_entities_counter = get_documents_entities(document)
+    documents_with_repeated_entities_number = 0
+
+    sentences, sentences_tags = read_document(path)
+    documents, documents_tags = convert_to_document(sentences, sentences_tags)
+
+    for document, document_tags in zip(documents, documents_tags):
+        document_entities_counter = get_documents_entities(document, document_tags)
+        documents_number += 1
         repeated_entities = {}
         for key in document_entities_counter.keys():
             if document_entities_counter[key] >= 2:
                 repeated_entities[key] = document_entities_counter[key]
+        entities_number += sum(document_entities_counter.values())
         if repeated_entities:
-            entities_set.update(set(repeated_entities.keys()))
-            entities_sum += sum(repeated_entities.values())
-            if show_repeated_entities:
-                print(document_id, dict(sorted(repeated_entities.items(), key=lambda item: item[1], reverse=True)))
-            documents_number += 1
+            documents_with_repeated_entities_number += 1
+            repeated_entities_set.update(set(repeated_entities.keys()))
+            repeated_entities_number += sum(repeated_entities.values())
 
     print('Subset:', subset)
-    print('Total number of documents with repeated entities:', documents_number)
-    print('Total number of unique repeated entities        :', len(entities_set))
-    print('Total number of repeated entities in the text   :', entities_sum)
+    print('Total number of documents                       : {}'.format(documents_number))
+    print('Total number of documents with repeated entities: {}'.format(documents_with_repeated_entities_number))
+    print('Total number of entities                        : {}'.format(entities_number))
+    print('Total number of repeated entities in the text   : {}'.format(repeated_entities_number))
+    print('Total number of unique repeated entities        : {}'.format(len(repeated_entities_set)))
+    print('Repeated entities ratio                         : {:.2%}'.format(repeated_entities_number / entities_number))
     print()
-
-
-def print_example(subset, id):
-    file_paths = {'train': 'conll2003/train.txt', 'eval': 'conll2003/valid.txt', 'test': 'conll2003/test.txt'}
-    sentences, tags, tags_number = read_data(file_paths[subset])
-    print('Subset:', subset)
-    print('Sentences size:', len(sentences), 'Tags size:', len(tags), 'Tags number:', tags_number)
-    documents = convert_to_document(sentences, tags)
-    sentences, tags, masks = make_sentences_mask(documents)
-    print()
-    print('After processing:')
-    print('Sentences size:', len(sentences), 'Tags size:', len(tags))
-    print()
-    print('Example:')
-    print('Sentence ID={}: length: {}, values: {}'.format(id, len(sentences[id]), sentences[id]))
-    print('Tags     ID={}: length: {}, values: {}'.format(id, len(tags[id]), tags[id]))
-    print('Mask     ID={}: length: {}, values: {}'.format(id, len(masks[id]), masks[id]))
-
 
 if __name__ == '__main__':
-    print_statistics()
-    find_repeated_entities('train')
-    find_repeated_entities('eval')
-    find_repeated_entities('test')
-    print_example('train', 0)
-
+    print_statistics('train')
+    print_statistics('dev')
+    print_statistics('test')
 
 """
 OUTPUT: 
