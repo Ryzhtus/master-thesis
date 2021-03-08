@@ -70,7 +70,7 @@ def get_documents_entities(document, document_tags):
 def make_sentence_mask(document, counter):
     masks = []
     for sentence in document:
-        sentence_mask = [0 for x in range(len(sentence))]
+        sentence_mask = [-1 for x in range(len(sentence))]
         for key in list(counter.keys()):
             entity = key
             window_size = len(entity.split(' '))
@@ -94,6 +94,9 @@ def print_statistics(subset):
 
     sentences, sentences_tags = read_document(path)
     documents, documents_tags = convert_to_document(sentences, sentences_tags)
+
+    documents = [document for document in documents if document != []]
+    documents_tags = [tags for tags in documents_tags if tags != []]
 
     for document, document_tags in zip(documents, documents_tags):
         document_entities_counter = get_documents_entities(document, document_tags)
@@ -122,38 +125,5 @@ if __name__ == '__main__':
     print_statistics('dev')
     print_statistics('test')
 
-"""
-OUTPUT: 
 
-Amount of documents for each CoNLL subset:
-Train: 945
-Eval : 215
-Test : 230
-
-Subset: train
-Total number of documents with repeated entities: 873
-Total number of unique repeated entities        : 2676
-Total number of repeated entities in the text   : 16160
-
-Subset: eval
-Total number of documents with repeated entities: 191
-Total number of unique repeated entities        : 953
-Total number of repeated entities in the text   : 4120
-
-Subset: test
-Total number of documents with repeated entities: 202
-Total number of unique repeated entities        : 875
-Total number of repeated entities in the text   : 3724
-
-Subset: train
-Sentences size: 14987 Tags size: 14987 Tags number: 204567
-
-After processing:
-Sentences size: 14042 Tags size: 14042
-
-Example:
-Sentence ID=100: length: 9, values: ['Rabinovich', 'is', 'winding', 'up', 'his', 'term', 'as', 'ambassador', '.']
-Tags     ID=100: length: 9, values: ['B-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
-Mask     ID=100: length: 9, values: [1, 0, 0, 0, 0, 0, 0, 0, 0]
-"""
 

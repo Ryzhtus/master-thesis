@@ -45,19 +45,21 @@ class ReaderCoNLL():
         sentences, sentences_tags = self.read_document(filename)
         documents, documents_tags = self.convert_to_document(sentences, sentences_tags)
 
+        documents = [document for document in documents if document != []]
+        documents_tags = [tags for tags in documents_tags if tags != []]
+
         for document, document_tags in zip(documents, documents_tags):
             document_entities_counter = self.get_documents_entities(document, document_tags)
             repeated_entities = {}
             for key in document_entities_counter.keys():
                 if document_entities_counter[key] >= 2:
                     repeated_entities[key] = document_entities_counter[key]
-
             documents_masks += self.make_sentence_mask(document, repeated_entities)
 
-        output_documents += sentences
-        output_documents_tags += sentences_tags
+            output_documents += document
+            output_documents_tags += document_tags
 
-        return sentences, sentences_tags, documents_masks
+        return output_documents, output_documents_tags, documents_masks
 
     def get_documents_entities(self, document, document_tags):
         counter = collections.Counter()
@@ -186,7 +188,7 @@ class ReaderOntonotes():
     def make_sentence_mask(self, document, counter):
         masks = []
         for sentence in document:
-            sentence_mask = [0 for x in range(len(sentence))]
+            sentence_mask = [-1 for x in range(len(sentence))]
             for key in list(counter.keys()):
                 entity = key
                 window_size = len(entity.split(' '))
@@ -197,19 +199,3 @@ class ReaderOntonotes():
             masks.append(sentence_mask)
 
         return masks
-
-
-if __name__ == '__main__':
-    """reader = ReaderOntonotes()
-    documents, documents_tags, documents_masks = reader.get_sentences('../data/ontonotes/development')
-    for i in range(10):
-        print(len(documents[i]), documents[i])
-        print(len(documents_tags[i]), documents_tags[i])
-        print(len(documents_masks[i]), documents_masks[i])"""
-
-    reader = ReaderCoNLL()
-    documents, documents_tags, documents_masks = reader.get_sentences('../data/conll2003/train.txt')
-    for i in range(10):
-        print(len(documents[i]), documents[i])
-        print(len(documents_tags[i]), documents_tags[i])
-        print(len(documents_masks[i + 1]), documents_masks[i + 1])
