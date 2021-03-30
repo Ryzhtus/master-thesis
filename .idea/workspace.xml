@@ -6,8 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebooks/NER-with-Nonlocal-Features-BERT-OntoNotes.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/NER-with-Nonlocal-Features-BERT-OntoNotes.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/named_entity_recognition/dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/dataset.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -222,7 +221,15 @@
       <workItem from="1614594959366" duration="2327000" />
       <workItem from="1614674916354" duration="7953000" />
       <workItem from="1614708069144" duration="635000" />
-      <workItem from="1615189823515" duration="5010000" />
+      <workItem from="1615189823515" duration="5737000" />
+      <workItem from="1615362016853" duration="611000" />
+      <workItem from="1615377498572" duration="4000" />
+      <workItem from="1615582306385" duration="1052000" />
+      <workItem from="1615583502797" duration="755000" />
+      <workItem from="1615794364346" duration="823000" />
+      <workItem from="1616351337772" duration="603000" />
+      <workItem from="1616398160653" duration="639000" />
+      <workItem from="1617088863924" duration="62000" />
     </task>
     <servers />
   </component>

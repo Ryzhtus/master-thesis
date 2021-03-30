@@ -65,10 +65,10 @@ def create_dataset_and_dataloader(dataset_name, filename, batch_size, tokenizer)
         reader = ReaderCoNLL()
         sentences, tags, masks = reader.get_sentences(filename)
         dataset = DatasetNER(sentences, tags, masks, tokenizer)
-        return dataset, DataLoader(dataset, batch_size, num_workers=4, collate_fn=dataset.paddings)
+        return dataset, DataLoader(dataset, batch_size, shuffle=True, collate_fn=dataset.paddings)
 
     if dataset_name == 'ontonotes':
         reader = ReaderOntonotes()
         sentences, tags, masks = reader.get_sentences(filename)
         dataset = DatasetNER(sentences, tags, masks, tokenizer)
-        return dataset, DataLoader(dataset, batch_size, num_workers=4, collate_fn=dataset.paddings)
+        return dataset, DataLoader(dataset, batch_size, shuffle=True, collate_fn=dataset.paddings)
