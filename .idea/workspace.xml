@@ -7,6 +7,9 @@
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/named_entity_recognition/dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/dataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/named_entity_recognition/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/metrics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/named_entity_recognition/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/named_entity_recognition/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/train.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,7 +39,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="full.screen.before.presentation.mode" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/data/ontonotes" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../Второй семестр/Математические методы визуализации/LayeredTree" />
     <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
   <component name="RecentsManager">
@@ -229,7 +232,13 @@
       <workItem from="1615794364346" duration="823000" />
       <workItem from="1616351337772" duration="603000" />
       <workItem from="1616398160653" duration="639000" />
-      <workItem from="1617088863924" duration="62000" />
+      <workItem from="1617088863924" duration="3551000" />
+      <workItem from="1617215344984" duration="1321000" />
+      <workItem from="1617369514663" duration="22000" />
+      <workItem from="1617693528035" duration="214000" />
+      <workItem from="1617734814204" duration="38000" />
+      <workItem from="1617886435046" duration="85000" />
+      <workItem from="1617918711615" duration="815000" />
     </task>
     <servers />
   </component>

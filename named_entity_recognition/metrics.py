@@ -1,6 +1,5 @@
 from seqeval.metrics import accuracy_score
 
-
 class FMeasureStorage():
     def __init__(self):
         self.true_positive = 0

@@ -62,6 +62,62 @@ def clear_tags(labels, predictions, masks, idx2tag, batch_element_length):
 
     return clear_labels, clear_predictions, repeated_entities_labels
 
+def clear_tags_tensor(labels, predictions, masks, batch_element_length):
+    """ this function removes <PAD>, CLS and SEP tags at each sentence
+        and convert both ids of tags and batch elements to SeqEval input format
+        [[first sentence tags], [second sentence tags], ..., [last sentence tags]]"""
+
+    clear_labels = []
+    clear_predictions = []
+    masked_true_labels = []
+    masked_pred_labels = []
+
+    sentence_labels = []
+    sentence_predictions = []
+    sentence_true_labels_mask = []
+    sentence_pred_labels_mask = []
+
+    sentence_length = 0
+
+    for idx in range(len(labels)):
+        if labels[idx] != 0:
+            sentence_labels.append(labels[idx])
+            sentence_predictions.append(predictions[idx])
+            if masks[idx] == 1:
+                sentence_true_labels_mask.append(labels[idx])
+                sentence_pred_labels_mask.append(predictions[idx])
+            sentence_length += 1
+
+            if sentence_length == batch_element_length:
+                # not including the 0 and the last element of list, because of CLS and SEP tokens
+                clear_labels.append(sentence_labels[1: len(sentence_labels) - 1])
+                clear_predictions.append(sentence_predictions[1: len(sentence_predictions) - 1])
+                masked_true_labels.append(sentence_true_labels_mask[1: len(sentence_true_labels_mask) - 1])
+                masked_pred_labels.append(sentence_pred_labels_mask[1: len(sentence_pred_labels_mask) - 1])
+                sentence_labels = []
+                sentence_predictions = []
+                sentence_true_labels_mask = []
+                sentence_pred_labels_mask = []
+                sentence_length = 0
+        else:
+            if sentence_labels:
+                clear_labels.append(sentence_labels[1: len(sentence_labels) - 1])
+                clear_predictions.append(sentence_predictions[1: len(sentence_predictions) - 1])
+                masked_true_labels.append(sentence_true_labels_mask[1: len(sentence_true_labels_mask) - 1])
+                masked_pred_labels.append(sentence_pred_labels_mask[1: len(sentence_pred_labels_mask) - 1])
+                sentence_labels = []
+                sentence_predictions = []
+                sentence_true_labels_mask = []
+                sentence_pred_labels_mask = []
+            else:
+                pass
+
+    masked_true_labels = [element for element in masked_true_labels if element != []]
+    masked_pred_labels = [element for element in masked_pred_labels if element != []]
+    repeated_entities_labels = {'true': masked_true_labels, 'pred': masked_pred_labels}
+
+    return clear_labels, clear_predictions, repeated_entities_labels
+
 
 def train_epoch(model, criterion, optimizer, data, tag2idx, idx2tag, device, scheduler=None, name=None):
     epoch_loss = 0
