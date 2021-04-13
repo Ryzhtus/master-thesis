@@ -165,7 +165,7 @@ def create_dataset_and_dataloader(dataset_name, filename, batch_size, tokenizer)
 def create_dataset_and_document_level_iterator(dataset_name, filename, tokenizer):
     if dataset_name == 'conll':
         reader = ReaderDocumentCoNLL()
-        sentences, tags, masks, document2sentences = reader.get_sentences("data/conll2003/train.txt")
+        sentences, tags, masks, document2sentences = reader.get_sentences(filename)
         dataset = DatasetDocumentNER(sentences, tags, masks, tokenizer)
         data_iterator = DocumentBatchIterator(dataset, document2sentences)
 
