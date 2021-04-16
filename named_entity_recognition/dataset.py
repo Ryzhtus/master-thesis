@@ -1,9 +1,8 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torch.nn.utils.rnn import pad_sequence
-
-from named_entity_recognition.reader import ReaderCoNLL, ReaderOntonotes
-from named_entity_recognition.reader_document import ReaderDocumentCoNLL
+import numpy
+from named_entity_recognition.reader import ReaderCoNLL, ReaderOntonotes, ReaderDocumentCoNLL, ReaderDocumentOntonotes
 
 class DatasetNER(Dataset):
     def __init__(self, sentences, tags, repeated_entities_masks, tokenizer):
@@ -107,11 +106,12 @@ class DatasetDocumentNER(Dataset):
 
 
 class DocumentBatchIterator():
-    def __init__(self, dataset, document2sentences):
+    def __init__(self, dataset, document2sentences, shuffle=True):
         self.dataset = dataset
         self.num_samples = len(dataset)
         self.document2sentences = document2sentences
         self.batches_count = len(document2sentences.keys())
+        self.shuffle = shuffle
 
     def __len__(self):
         return self.batches_count
@@ -120,7 +120,13 @@ class DocumentBatchIterator():
         return self._iterate_batches()
 
     def _iterate_batches(self):
-        for document_id in range(self.batches_count):
+        if self.shuffle:
+            document_ids = numpy.arange(self.batches_count)
+            numpy.random.shuffle(document_ids)
+        else:
+            document_ids = numpy.arange(self.batches_count)
+
+        for document_id in document_ids:
 
             document_sentences_ids = self.document2sentences[document_id]
 
@@ -148,7 +154,6 @@ class DocumentBatchIterator():
                 torch.LongTensor(batch_tags_ids),
                 torch.LongTensor(batch_tokenized_mask)
             ]
-
 def create_dataset_and_dataloader(dataset_name, filename, batch_size, tokenizer):
     if dataset_name == 'conll':
         reader = ReaderCoNLL()
@@ -167,6 +172,14 @@ def create_dataset_and_document_level_iterator(dataset_name, filename, tokenizer
         reader = ReaderDocumentCoNLL()
         sentences, tags, masks, document2sentences = reader.get_sentences(filename)
         dataset = DatasetDocumentNER(sentences, tags, masks, tokenizer)
-        data_iterator = DocumentBatchIterator(dataset, document2sentences)
+        data_iterator = DocumentBatchIterator(dataset, document2sentences, shuffle=True)
+
+        return dataset, data_iterator
+
+    if dataset_name == 'ontonotes':
+        reader = ReaderDocumentCoNLL()
+        sentences, tags, masks, document2sentences = reader.get_sentences(filename)
+        dataset = DatasetDocumentNER(sentences, tags, masks, tokenizer)
+        data_iterator = DocumentBatchIterator(dataset, document2sentences, shuffle=True)
 
         return dataset, data_iterator

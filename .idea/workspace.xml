@@ -6,7 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/named_entity_recognition/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/named_entity_recognition/dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/dataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/named_entity_recognition/reader.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/reader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/named_entity_recognition/reader_document.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -238,7 +240,8 @@
       <workItem from="1617918711615" duration="1485000" />
       <workItem from="1618245783190" duration="3652000" />
       <workItem from="1618298548238" duration="5489000" />
-      <workItem from="1618401797064" duration="67000" />
+      <workItem from="1618401797064" duration="718000" />
+      <workItem from="1618583316893" duration="2252000" />
     </task>
     <servers />
   </component>
