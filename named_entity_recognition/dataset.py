@@ -154,20 +154,20 @@ class DocumentBatchIterator():
                 torch.LongTensor(batch_tags_ids),
                 torch.LongTensor(batch_tokenized_mask)
             ]
-def create_dataset_and_dataloader(dataset_name, filename, batch_size, tokenizer):
+def create_dataset_and_dataloader(dataset_name: str, filename: str, batch_size: int, shuffle: bool, tokenizer):
     if dataset_name == 'conll':
         reader = ReaderCoNLL()
         sentences, tags, masks = reader.get_sentences(filename)
         dataset = DatasetNER(sentences, tags, masks, tokenizer)
-        return dataset, DataLoader(dataset, batch_size, shuffle=True, collate_fn=dataset.paddings)
+        return dataset, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
     if dataset_name == 'ontonotes':
         reader = ReaderOntonotes()
         sentences, tags, masks = reader.get_sentences(filename)
         dataset = DatasetNER(sentences, tags, masks, tokenizer)
-        return dataset, DataLoader(dataset, batch_size, shuffle=True, collate_fn=dataset.paddings)
+        return dataset, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
-def create_dataset_and_document_level_iterator(dataset_name, filename, tokenizer):
+def create_dataset_and_document_level_iterator(dataset_name: str, filename: str, tokenizer):
     if dataset_name == 'conll':
         reader = ReaderDocumentCoNLL()
         sentences, tags, masks, document2sentences = reader.get_sentences(filename)
