@@ -106,18 +106,54 @@ class DatasetDocumentNER(Dataset):
 
 
 class DocumentBatchIterator():
-    def __init__(self, dataset, document2sentences, shuffle=True):
+    def __init__(self, dataset, document2sentences, batch_size=20, shuffle=True):
         self.dataset = dataset
         self.num_samples = len(dataset)
         self.document2sentences = document2sentences
         self.batches_count = len(document2sentences.keys())
         self.shuffle = shuffle
+        self.batch_size = batch_size
 
     def __len__(self):
         return self.batches_count
 
     def __iter__(self):
         return self._iterate_batches()
+
+    def split_document(self, sentences_id):
+        ids = sentences_id.copy()
+        batches = []
+
+        while ids:
+            if len(ids) < self.batch_size:
+                batches.append(ids)
+            else:
+                batch = []
+                for idx in range(self.batch_size):
+                    batch.append(idx.pop(0))
+
+                batches.append(batch)
+
+    def _group_ids(self):
+        if self.shuffle:
+            document_ids = numpy.arange(self.batches_count)
+            numpy.random.shuffle(document_ids)
+        else:
+            document_ids = numpy.arange(self.batches_count)
+
+        batches_ids = []
+        batch_ids = []
+        for document_id in document_ids:
+            if len(self.document2sentences[document_id]) >= self.batch_size:
+                batches_ids += self.split_document(self.document2sentences[document_id])
+            else:
+                if len(batch_ids) > self.batch_size:
+                    batches_ids += batch_ids
+                    batch_ids = []
+                else:
+                    batch_ids += self.document2sentences[document_id]
+
+        return batches_ids
 
     def _iterate_batches(self):
         if self.shuffle:
@@ -154,6 +190,8 @@ class DocumentBatchIterator():
                 torch.LongTensor(batch_tags_ids),
                 torch.LongTensor(batch_tokenized_mask)
             ]
+
+
 def create_dataset_and_dataloader(dataset_name: str, filename: str, batch_size: int, shuffle: bool, tokenizer):
     if dataset_name == 'conll':
         reader = ReaderCoNLL()
@@ -167,12 +205,12 @@ def create_dataset_and_dataloader(dataset_name: str, filename: str, batch_size: 
         dataset = DatasetNER(sentences, tags, masks, tokenizer)
         return dataset, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
-def create_dataset_and_document_level_iterator(dataset_name: str, filename: str, tokenizer):
+def create_dataset_and_document_level_iterator(dataset_name: str, filename: str, group_documents: bool, batch_size: int, tokenizer):
     if dataset_name == 'conll':
         reader = ReaderDocumentCoNLL()
         sentences, tags, masks, document2sentences = reader.get_sentences(filename)
         dataset = DatasetDocumentNER(sentences, tags, masks, tokenizer)
-        data_iterator = DocumentBatchIterator(dataset, document2sentences, shuffle=True)
+        data_iterator = DocumentBatchIterator(dataset, document2sentences, group_documents=group_documents, batch_size=batch_size, shuffle=True)
 
         return dataset, data_iterator
 
