@@ -3,6 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 from torch.nn.utils.rnn import pad_sequence
 import numpy
 from named_entity_recognition.reader import ReaderCoNLL, ReaderOntonotes, ReaderDocumentCoNLL, ReaderDocumentOntonotes
+from named_entity_recognition.iterator import DocumentBatchIterator
 
 class DatasetNER(Dataset):
     def __init__(self, sentences, tags, repeated_entities_masks, tokenizer):
@@ -103,93 +104,6 @@ class DatasetDocumentNER(Dataset):
         tokenized_mask = [-1] + tokenized_mask + [-1]
 
         return tokens_ids, tags_ids, tokenized_mask
-
-
-class DocumentBatchIterator():
-    def __init__(self, dataset, document2sentences, batch_size=20, shuffle=True):
-        self.dataset = dataset
-        self.num_samples = len(dataset)
-        self.document2sentences = document2sentences
-        self.batches_count = len(document2sentences.keys())
-        self.shuffle = shuffle
-        self.batch_size = batch_size
-
-    def __len__(self):
-        return self.batches_count
-
-    def __iter__(self):
-        return self._iterate_batches()
-
-    def split_document(self, sentences_id):
-        ids = sentences_id.copy()
-        batches = []
-
-        while ids:
-            if len(ids) < self.batch_size:
-                batches.append(ids)
-            else:
-                batch = []
-                for idx in range(self.batch_size):
-                    batch.append(idx.pop(0))
-
-                batches.append(batch)
-
-    def _group_ids(self):
-        if self.shuffle:
-            document_ids = numpy.arange(self.batches_count)
-            numpy.random.shuffle(document_ids)
-        else:
-            document_ids = numpy.arange(self.batches_count)
-
-        batches_ids = []
-        batch_ids = []
-        for document_id in document_ids:
-            if len(self.document2sentences[document_id]) >= self.batch_size:
-                batches_ids += self.split_document(self.document2sentences[document_id])
-            else:
-                if len(batch_ids) > self.batch_size:
-                    batches_ids += batch_ids
-                    batch_ids = []
-                else:
-                    batch_ids += self.document2sentences[document_id]
-
-        return batches_ids
-
-    def _iterate_batches(self):
-        if self.shuffle:
-            document_ids = numpy.arange(self.batches_count)
-            numpy.random.shuffle(document_ids)
-        else:
-            document_ids = numpy.arange(self.batches_count)
-
-        for document_id in document_ids:
-
-            document_sentences_ids = self.document2sentences[document_id]
-
-            batch_tokens_ids = []
-            batch_tags_ids = []
-            batch_tokenized_mask = []
-
-            for sentence_id in document_sentences_ids:
-                sentence_token_ids, sentence_tag_ids, sentence_mask = self.dataset[sentence_id]
-                batch_tokens_ids.append(sentence_token_ids)
-                batch_tags_ids.append(sentence_tag_ids)
-                batch_tokenized_mask.append(sentence_mask)
-
-            max_sentence_length = len(max(batch_tokens_ids, key=len))
-
-            for batch_element_id in range(len(batch_tokens_ids)):
-                if len(batch_tokens_ids[batch_element_id]) < max_sentence_length:
-                    for i in range(len(batch_tokens_ids[batch_element_id]), max_sentence_length):
-                        batch_tokens_ids[batch_element_id].append(0)
-                        batch_tags_ids[batch_element_id].append(0)
-                        batch_tokenized_mask[batch_element_id].append(0)
-
-            yield [
-                torch.LongTensor(batch_tokens_ids),
-                torch.LongTensor(batch_tags_ids),
-                torch.LongTensor(batch_tokenized_mask)
-            ]
 
 
 def create_dataset_and_dataloader(dataset_name: str, filename: str, batch_size: int, shuffle: bool, tokenizer):
