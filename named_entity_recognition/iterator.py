@@ -42,6 +42,8 @@ class DocumentBatchIterator():
 
     def grouper(self, n, li):
         it = chain(*li)
+        for item in it:
+            print(item)
         out_l = []
         while True:
             chunk = list(islice(it, n))
