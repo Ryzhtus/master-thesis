@@ -42,8 +42,7 @@ class DocumentBatchIterator():
 
     def grouper(self, n, li):
         it = chain(*li)
-        for item in it:
-            print(item)
+
         out_l = []
         while True:
             chunk = list(islice(it, n))
@@ -80,15 +79,24 @@ class DocumentBatchIterator():
                 else:
                     batch_ids.append(self.document2sentences[document_id])
 
-        final_batches = []
+        batches_of_batch_size = []
+        batches_for_following_group = []
         for batch in batches_ids:
             if isinstance(batch[0], list):
                 for subbatch in batch:
-                    final_batches.append(subbatch)
+                    if len(batch) == self.batch_size:
+                        batches_of_batch_size.append(subbatch)
+                    else:
+                        batches_for_following_group.append(subbatch)
             else:
-                final_batches.append(batch)
+                if len(batch) == self.batch_size:
+                    batches_of_batch_size.append(batch)
+                else:
+                    batches_for_following_group.append(batch)
 
-        return self.grouper(self.batch_size, final_batches)
+        batches_of_batch_size += self.grouper(self.batch_size, batches_for_following_group)
+
+        return batches_of_batch_size
 
     def _iterate_grouped_batches(self):
         batches = self.group_ids()
