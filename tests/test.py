@@ -63,7 +63,7 @@ axs[2].hist(data[subsets[2]])
 axs[2].set_title(subsets[2])
 axs[2].set_xlabel('Number of documents in batch')
 axs[2].set_ylabel('Number of batches')
-#plt.savefig('document_per_batch_hist.png')
+plt.savefig('document_per_batch_hist_after.png')
 plt.show()
 
 fig, axs = plt.subplots(1, 3, figsize=(20, 7))

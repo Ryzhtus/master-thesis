@@ -52,6 +52,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\notebooks\results_ontonotes.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\ontonotes\ontonotes_reader.py">
           <value>
             <Attribute>

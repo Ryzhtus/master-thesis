@@ -161,3 +161,53 @@ class DocumentBatchIterator():
                 torch.LongTensor(batch_tags_ids),
                 torch.LongTensor(batch_tokenized_mask)
             ]
+
+class SentenceBatchIteratorWithDocumentInformation():
+    def __init__(self, dataset, document2sentences, group_documents, batch_size=20, shuffle=True):
+        self.dataset = dataset
+        self.num_samples = len(dataset)
+        self.document2sentences = document2sentences
+        self.batches_count = len(document2sentences.keys())
+        self.shuffle = shuffle
+        self.batch_size = batch_size
+
+    def __len__(self):
+        return self.batches_count
+
+    def __iter__(self):
+        return self._iterate_batches()
+
+    def _iterate_batches(self):
+        if self.shuffle:
+            document_ids = numpy.arange(self.batches_count)
+            numpy.random.shuffle(document_ids)
+        else:
+            document_ids = numpy.arange(self.batches_count)
+
+        for document_id in document_ids:
+            document_sentences_ids = self.document2sentences[document_id]
+
+            batch_tokens_ids = []
+            batch_tags_ids = []
+            batch_tokenized_mask = []
+
+            for sentence_id in document_sentences_ids:
+                sentence_token_ids, sentence_tag_ids, sentence_mask = self.dataset[sentence_id]
+                batch_tokens_ids.append(sentence_token_ids)
+                batch_tags_ids.append(sentence_tag_ids)
+                batch_tokenized_mask.append(sentence_mask)
+
+            max_sentence_length = len(max(batch_tokens_ids, key=len))
+
+            for batch_element_id in range(len(batch_tokens_ids)):
+                if len(batch_tokens_ids[batch_element_id]) < max_sentence_length:
+                    for i in range(len(batch_tokens_ids[batch_element_id]), max_sentence_length):
+                        batch_tokens_ids[batch_element_id].append(0)
+                        batch_tags_ids[batch_element_id].append(0)
+                        batch_tokenized_mask[batch_element_id].append(0)
+
+            yield [
+                torch.LongTensor(batch_tokens_ids),
+                torch.LongTensor(batch_tags_ids),
+                torch.LongTensor(batch_tokenized_mask)
+            ]
