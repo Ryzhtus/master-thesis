@@ -162,10 +162,11 @@ def create_dataset_and_document_level_iterator(dataset_name: str, filename: str,
         reader = ReaderDocumentCoNLL()
         sentences, tags, masks, document2sentences = reader.get_sentences(filename)
         dataset = DatasetDocumentNER(sentences, tags, masks, tokenizer)
+        documents = Document(sentences, document2sentences, tokenizer)
         data_iterator = DocumentBatchIterator(dataset, document2sentences, group_documents=group_documents,
                                               batch_size=batch_size, shuffle=True)
 
-        return dataset, data_iterator
+        return dataset, documents, data_iterator
 
     if dataset_name == 'ontonotes':
         reader = ReaderDocumentOntonotes()
