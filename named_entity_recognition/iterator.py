@@ -102,6 +102,7 @@ class DocumentBatchIterator():
 
     def _iterate_grouped_batches(self):
         batches = self.group_ids()
+        self.batches_count = len(batches)
 
         for batch_ids in batches:
             batch_tokens_ids = []
