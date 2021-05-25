@@ -10,7 +10,7 @@ class DocumentBatchIterator():
         self.num_samples = len(dataset)
         self.document2sentences = document2sentences
         self.sentence2document = {sentence_id: document_id for document_id in self.document2sentences.keys()
-                                  for sentence_id in self.document2sentences[document_id] }
+                                  for sentence_id in self.document2sentences[document_id]}
         self.batches_count = len(document2sentences.keys())
         self.shuffle = shuffle
         self.batch_size = batch_size
@@ -146,12 +146,14 @@ class DocumentBatchIterator():
             batch_tokens_ids = []
             batch_tags_ids = []
             batch_tokenized_mask = []
+            batch_documents = []
 
             for sentence_id in document_sentences_ids:
                 sentence_token_ids, sentence_tag_ids, sentence_mask = self.dataset[sentence_id]
                 batch_tokens_ids.append(sentence_token_ids)
                 batch_tags_ids.append(sentence_tag_ids)
                 batch_tokenized_mask.append(sentence_mask)
+                batch_documents.append(self.sentence2document[sentence_id])
 
             max_sentence_length = len(max(batch_tokens_ids, key=len))
 
@@ -165,7 +167,8 @@ class DocumentBatchIterator():
             yield [
                 torch.LongTensor(batch_tokens_ids),
                 torch.LongTensor(batch_tags_ids),
-                torch.LongTensor(batch_tokenized_mask)
+                torch.LongTensor(batch_tokenized_mask),
+                batch_documents
             ]
 
 class SentenceBatchIteratorWithDocumentInformation():
