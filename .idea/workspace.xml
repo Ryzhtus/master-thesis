@@ -5,13 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/named_entity_recognition/document.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/named_entity_recognition/train_context.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/named_entity_recognition/utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notebooks/Experiments-Document-Level-NER-with-Nonlocal-Features-BERT-CoNLL.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/named_entity_recognition/dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/named_entity_recognition/iterator.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/iterator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/named_entity_recognition/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/named_entity_recognition/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/model.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -151,7 +147,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest in test_reader_document.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest in C:/Users/shkun/Documents/Учеба/МФТИ/Диссертация/ner-with-nonlocal-features/named_entity_recognition/test_reader_document.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="ner-with-nonlocal-features" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -173,13 +169,13 @@
       <item itemvalue="Python.repeated_entities_statistics_ontonotes" />
       <item itemvalue="Python.what_is_inside_reader" />
       <item itemvalue="Python.dataset" />
-      <item itemvalue="Python tests.pytest in test_reader_document.py" />
+      <item itemvalue="Python tests.pytest in C:/Users/shkun/Documents/Учеба/МФТИ/Диссертация/ner-with-nonlocal-features/named_entity_recognition/test_reader_document.py" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.what_is_inside_reader" />
         <item itemvalue="Python.dataset" />
-        <item itemvalue="Python tests.pytest in test_reader_document.py" />
+        <item itemvalue="Python tests.pytest in C:/Users/shkun/Documents/Учеба/МФТИ/Диссертация/ner-with-nonlocal-features/named_entity_recognition/test_reader_document.py" />
         <item itemvalue="Python.repeated_entities_statistics_ontonotes" />
         <item itemvalue="Python.repeated_entities_statistics_conll" />
       </list>
@@ -264,7 +260,7 @@
       <workItem from="1621935780966" duration="2322000" />
       <workItem from="1621941482266" duration="445000" />
       <workItem from="1621946266513" duration="2305000" />
-      <workItem from="1621964077636" duration="1514000" />
+      <workItem from="1621964077636" duration="2028000" />
     </task>
     <servers />
   </component>
