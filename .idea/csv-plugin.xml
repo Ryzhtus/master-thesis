@@ -38,7 +38,21 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\named_entity_recognition\test_reader_document.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\named_entity_recognition\train.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\named_entity_recognition\what_is_inside_reader.py">
           <value>
             <Attribute>
               <option name="separator" value="," />
