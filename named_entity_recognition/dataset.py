@@ -137,9 +137,9 @@ class Document(Dataset):
             tokens = [self.tokenizer.cls_token] + tokens + [self.tokenizer.sep_token]
             tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
 
-            document_ids[sentence_id] = torch.LongTensor(tokens_ids)
+            document_ids[sentence_id] = torch.LongTensor(tokens_ids).unsqueeze(0)
 
-        return torch.LongTensor(document_ids)
+        return torch.LongTensor(torch.cat(document_ids, dim=0))
 
 
 def create_dataset_and_dataloader(dataset_name: str, filename: str, batch_size: int, shuffle: bool, tokenizer):
