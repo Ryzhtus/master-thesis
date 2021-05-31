@@ -29,9 +29,9 @@ def get_sentences(path):
     for _, _, files in os.walk(path):
         for filename in files:
             sentences, sentences_tags = read_document(path + '/' + filename)
-
-            documents += sentences
-            documents_tags += sentences_tags
+            if sentences != []:
+                documents += sentences
+                documents_tags += sentences_tags
 
     return documents, documents_tags
 
@@ -86,6 +86,7 @@ def print_statistics(subset):
 
     entities_number = 0
     repeated_entities_number = 0
+    entities_set = set()
     repeated_entities_set = set()
     documents_number = 0
     documents_with_repeated_entities_number = 0
@@ -93,22 +94,26 @@ def print_statistics(subset):
     for _, _, files in os.walk(path):
         for filename in files:
             document, document_tags = read_document(path + '/' + filename)
-            document_entities_counter = get_documents_entities(document, document_tags)
-            documents_number += 1
-            repeated_entities = {}
-            for key in document_entities_counter.keys():
-                if document_entities_counter[key] >= 2:
-                    repeated_entities[key] = document_entities_counter[key]
-            entities_number += sum(document_entities_counter.values())
-            if repeated_entities:
-                documents_with_repeated_entities_number += 1
-                repeated_entities_set.update(set(repeated_entities.keys()))
-                repeated_entities_number += sum(repeated_entities.values())
+            if document:
+                document_entities_counter = get_documents_entities(document, document_tags)
+                documents_number += 1
+                repeated_entities = {}
+                for key in document_entities_counter.keys():
+                    if document_entities_counter[key] >= 2:
+                        repeated_entities[key] = document_entities_counter[key]
+                entities_number += sum(document_entities_counter.values())
+                entities_set.update(set(document_entities_counter.keys()))
+                if repeated_entities:
+                    documents_with_repeated_entities_number += 1
+                    repeated_entities_set.update(set(repeated_entities.keys()))
+                    repeated_entities_number += sum(repeated_entities.values())
+
 
     print('Subset:', subset)
     print('Total number of documents                       : {}'.format(documents_number))
     print('Total number of documents with repeated entities: {}'.format(documents_with_repeated_entities_number))
     print('Total number of entities                        : {}'.format(entities_number))
+    print('Total number of unique entities                 : {}'.format(len(entities_set)))
     print('Total number of repeated entities in the text   : {}'.format(repeated_entities_number))
     print('Total number of unique repeated entities        : {}'.format(len(repeated_entities_set)))
     print('Repeated entities ratio                         : {:.2%}'.format(repeated_entities_number / entities_number))

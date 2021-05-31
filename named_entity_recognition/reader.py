@@ -359,14 +359,15 @@ class ReaderDocumentOntonotes():
             for document_id, filename in enumerate(files):
                 sentences, sentences_tags, sentences_masks = self.read_document(path + '/' + filename)
 
-                document_id2sentences_ids[document_id] = [i for i in range(document_start_sentence_id,
-                                                                           document_start_sentence_id + len(sentences))]
+                if sentences:
+                    document_id2sentences_ids[document_id] = [i for i in range(document_start_sentence_id,
+                                                                               document_start_sentence_id + len(sentences))]
 
-                documents += sentences
-                documents_tags += sentences_tags
-                documents_masks += sentences_masks
+                    documents += sentences
+                    documents_tags += sentences_tags
+                    documents_masks += sentences_masks
 
-                document_start_sentence_id += len(sentences)
+                    document_start_sentence_id += len(sentences)
 
         return documents, documents_tags, documents_masks, document_id2sentences_ids
 
