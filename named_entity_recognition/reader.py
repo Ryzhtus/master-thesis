@@ -354,9 +354,10 @@ class ReaderDocumentOntonotes():
         documents_masks = []
         document_id2sentences_ids = {}
         document_start_sentence_id = 0
+        document_id = 0
 
         for _, _, files in os.walk(path):
-            for document_id, filename in enumerate(files):
+            for filename in files:
                 sentences, sentences_tags, sentences_masks = self.read_document(path + '/' + filename)
 
                 if sentences:
@@ -368,6 +369,7 @@ class ReaderDocumentOntonotes():
                     documents_masks += sentences_masks
 
                     document_start_sentence_id += len(sentences)
+                    document_id += 1
 
         return documents, documents_tags, documents_masks, document_id2sentences_ids
 

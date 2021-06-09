@@ -54,7 +54,6 @@ class ContextBertNER(nn.Module):
         last_hidden_state = self.bert(batch)[0]
 
         result_hidden_state = last_hidden_state.clone()
-        result_hidden_state = result_hidden_state.detach().cpu()
 
         additional_context = torch.zeros_like(result_hidden_state, requires_grad=False)
 
@@ -102,7 +101,6 @@ class DocumentContextBertNER(nn.Module):
         last_hidden_state = self.bert(document)[0]
 
         result_hidden_state = last_hidden_state.clone()
-        result_hidden_state = result_hidden_state.detach().cpu()
 
         token2embedding = {}
 
@@ -123,7 +121,6 @@ class DocumentContextBertNER(nn.Module):
         last_hidden_state = self.bert(batch)[0]
 
         result_hidden_state = last_hidden_state.clone()
-        result_hidden_state = result_hidden_state.detach().cpu()
 
         additional_context = torch.zeros_like(result_hidden_state, requires_grad=False)
 
