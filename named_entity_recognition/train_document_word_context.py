@@ -31,7 +31,7 @@ def train_epoch(model, criterion, optimizer, data, tag2idx, idx2tag, device, doc
                 sentences_from_documents = {}
 
                 for document_id in documents_set:
-                    mean_embeddings_for_batch_documents[document_id] = model.get_document_context(documents[document_id].to(device))
+                    mean_embeddings_for_batch_documents[document_id] = model.get_document_context(documents[document_id].to(device), documents.collect_all_positions_for_each_word(document_id))
                     sentences_from_documents[document_id] = documents.get_document_words_by_sentences(document_id)
 
                 for param in model.bert.parameters():
@@ -116,8 +116,7 @@ def eval_epoch(model, criterion, data, tag2idx, idx2tag, device, documents=None,
                     sentences_from_documents = {}
 
                     for document_id in documents_set:
-                        mean_embeddings_for_batch_documents[document_id] = model.get_document_context(
-                            documents[document_id].to(device))
+                        mean_embeddings_for_batch_documents[document_id] = model.get_document_context(documents[document_id].to(device), documents.collect_all_positions_for_each_word(document_id))
                         sentences_from_documents[document_id] = documents.get_document_words_by_sentences(document_id)
 
                     for param in model.bert.parameters():
@@ -197,7 +196,7 @@ def test_model(model, criterion, data, tag2idx, idx2tag, device, documents=None)
 
                     for document_id in documents_set:
                         mean_embeddings_for_batch_documents[document_id] = model.get_document_context(
-                            documents[document_id].to(device))
+                            documents[document_id].to(device), documents.collect_all_positions_for_each_word(document_id))
                         sentences_from_documents[document_id] = documents.get_document_words_by_sentences(document_id)
 
                     for param in model.bert.parameters():
