@@ -3,6 +3,7 @@ from named_entity_recognition.dataset import CoNLLDataset, SentencesDataset, Sen
 from named_entity_recognition.iterator import DocumentBatchIterator
 from named_entity_recognition.document import Document
 
+import torch
 from torch.utils.data import DataLoader
 
 
@@ -112,3 +113,25 @@ def clear_tags(labels, predictions, masks, idx2tag, batch_element_length):
     repeated_entities_labels = {'true': masked_true_labels, 'pred': masked_pred_labels}
 
     return clear_labels, clear_predictions, repeated_entities_labels
+
+def calculate_mean_context_vectors(documents, document_id, document_last_hidden_state):
+    words = documents.collect_all_positions_for_each_word(document_id)
+
+    for key in words:
+        current_word = []
+        for pos in words[key]['pos']:
+            sentence_id = pos['sentence_id']
+            if len(pos['ids']) == 1:
+                position = pos['ids']
+                current_word.append(document_last_hidden_state[sentence_id][position])
+            else:
+                position_start = pos['ids'][0]
+                position_end = pos['ids'][-1]
+                current_word.append(document_last_hidden_state[sentence_id][position_start: position_end + 1])
+
+        all_context_vectors_of_a_word = torch.stack(current_word, dim=0)
+        mean_context_vector_of_a_word = torch.mean(all_context_vectors_of_a_word, dim=0)
+
+        words[key]['context_vector'] = mean_context_vector_of_a_word
+
+    return words

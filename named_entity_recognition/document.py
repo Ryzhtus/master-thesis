@@ -13,6 +13,9 @@ class Document(Dataset):
         return len(self.documents)
 
     def __getitem__(self, item):
+        """
+        Returns all sentences of the particular document encoded by a tokenizer
+        """
         document = self.documents[item]
         document_ids = []
 
@@ -38,7 +41,10 @@ class Document(Dataset):
 
         return torch.LongTensor(torch.cat(document_ids, dim=0))
 
-    def get_document(self, item):
+    def get_document_tokens(self, item):
+        """
+        Returns all tokenized sentences of the particular document, but not encoded
+        """
         document = self.documents[item]
         document_bpe = []
 
@@ -58,7 +64,6 @@ class Document(Dataset):
                 tokens += [self.tokenizer.pad_token] * difference
 
             tokens = [self.tokenizer.cls_token] + tokens + [self.tokenizer.sep_token]
-
             document_bpe[sentence_id] = tokens
 
         return document_bpe
@@ -66,13 +71,14 @@ class Document(Dataset):
     @staticmethod
     def find_token_positions_for_each_word(tokens):
         """
-        Return Dict, where keys are words and values are lists with corresponding positions of tokens forming the word
+        Returns a dict, where keys are words and values are lists with corresponding positions of tokens forming the word
         {0: [0], 1: [1, 2], 2: [3, 4, 5], 3: [6], ...}
         """
         words_ids = {}
         current_word_ids = []
         current_word_bpe = []
         word_id = 0
+
         for idx in range(len(tokens) - 1):
             if ('##' not in tokens[idx]) and ('##' not in tokens[idx + 1]):
                 current_word_ids.append(idx)
@@ -99,8 +105,13 @@ class Document(Dataset):
 
         return words_ids
 
-    def collect_all_positions_for_each_token(self, item):
-        document = self.get_document(item)
+    def collect_all_positions_for_each_word(self, item):
+        """
+        Returns a dict with all words in a document with their bpe-tokens positions in each sentence of the document
+        Format: {Word Id (key): {tokens: [list of bpe-tokens of a particular word], pos: [list of dicts with sentence_id
+        and positions of bpe-tokens in the corresponding sentence]} }
+        """
+        document = self.get_document_tokens(item)
 
         word_id = 0
         words = {}
@@ -110,14 +121,14 @@ class Document(Dataset):
             sentence_words = self.find_token_positions_for_each_word(sentence)
             for word in sentence_words:
                 for key in words:
-                    if words[key]['tokens'] == sentence_words[word]['bpe']:
+                    if words[key]['bpe'] == sentence_words[word]['bpe']:
                         words[key]['pos'].append({'sentence_id': sentence_id, 'ids': sentence_words[word]['positions']})
                         is_in_words = True
 
                 if is_in_words:
                     is_in_words = False
                 else:
-                    words[word_id] = {'tokens': sentence_words[word]['bpe'],
+                    words[word_id] = {'bpe': sentence_words[word]['bpe'],
                                       'pos': [{'sentence_id': sentence_id, 'ids': sentence_words[word]['positions']}]}
                     word_id += 1
 

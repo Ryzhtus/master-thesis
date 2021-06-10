@@ -1,5 +1,5 @@
 from named_entity_recognition.metrics import FMeasureStorage, AccuracyStorage
-from named_entity_recognition.utils import clear_tags
+from named_entity_recognition.utils import clear_tags, calculate_mean_context_vectors
 from seqeval.metrics import performance_measure
 from tqdm import tqdm
 

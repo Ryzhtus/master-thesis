@@ -151,15 +151,22 @@ class ReaderDocumentCoNLL():
         sentences, sentences_tags = self.read_document(filename)
         documents, documents_tags = self.convert_to_document(sentences, sentences_tags)
 
+        # dict {document_id: sentence_id}
         document_id2sentences_ids = {}
+        # dict {sentence_id: {document_id, sentence_position_in_document}}
+        sentence_id_in_document = {}
+
         documents = [document for document in documents if document != []]
 
         sentence_id = 0
         for document_id, document in enumerate(documents):
             document_id2sentences_ids[document_id] = []
+            sentence_position_in_document = 0
             for sentence in document:
                 document_id2sentences_ids[document_id].append(sentence_id)
+                sentence_id_in_document[sentence_id] = {'document_id': document_id, 'sentence_pos_id': sentence_position_in_document}
                 sentence_id += 1
+                sentence_position_in_document += 1
 
         documents_tags = [tags for tags in documents_tags if tags != []]
 
@@ -174,7 +181,7 @@ class ReaderDocumentCoNLL():
             output_documents += document
             output_documents_tags += document_tags
 
-        return output_documents, output_documents_tags, documents_masks, document_id2sentences_ids
+        return output_documents, output_documents_tags, documents_masks, document_id2sentences_ids, sentence_id_in_document
 
     def get_documents_entities(self, document, document_tags):
         counter = collections.Counter()

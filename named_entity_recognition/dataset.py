@@ -58,7 +58,7 @@ class CoNLLDataset(Dataset):
 
 
 class SentencesPlusDocumentsDataset(Dataset):
-    def __init__(self, sentences, tags, repeated_entities_masks, document2sentences, tokenizer):
+    def __init__(self, sentences, tags, repeated_entities_masks, document2sentences, sentence2position_in_document, tokenizer):
         self.sentences = sentences
         self.sentences_tags = tags
         self.repeated_entities_masks = repeated_entities_masks
@@ -66,6 +66,7 @@ class SentencesPlusDocumentsDataset(Dataset):
         self.document2sentences = document2sentences
         self.sentence2document = {sentence_id: document_id for document_id in self.document2sentences.keys()
                                   for sentence_id in self.document2sentences[document_id]}
+        self.sentence2position_in_document = sentence2position_in_document
 
         self.tokenizer = tokenizer
 
@@ -81,6 +82,7 @@ class SentencesPlusDocumentsDataset(Dataset):
         tags = self.sentences_tags[item]
         mask = self.repeated_entities_masks[item]
         document_id = self.sentence2document[item]
+        sentence_id_in_document = self.sentence2position_in_document[item]['sentence_pos_id']
 
         word2mask = dict(zip(words, mask))
         word2tag = dict(zip(words, tags))
@@ -104,16 +106,16 @@ class SentencesPlusDocumentsDataset(Dataset):
 
         tokenized_mask = [-1] + tokenized_mask + [-1]
 
-        return torch.LongTensor(tokens_ids), torch.LongTensor(tags_ids), torch.LongTensor(tokenized_mask), document_id
+        return torch.LongTensor(tokens_ids), torch.LongTensor(tags_ids), torch.LongTensor(tokenized_mask), document_id, sentence_id_in_document
 
     def paddings(self, batch):
-        tokens, tags, masks, ids = list(zip(*batch))
+        tokens, tags, masks, document_ids, sentences_ids = list(zip(*batch))
 
         tokens = pad_sequence(tokens, batch_first=True)
         tags = pad_sequence(tags, batch_first=True)
         masks = pad_sequence(masks, batch_first=True)
 
-        return tokens, tags, masks, ids
+        return tokens, tags, masks, document_ids, sentences_ids
 
 
 class SentencesDataset(Dataset):
