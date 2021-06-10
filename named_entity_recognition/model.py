@@ -2,6 +2,7 @@ from transformers import BertModel
 import torch.nn as nn
 import torch
 
+
 class BertNER(nn.Module):
     def __init__(self, num_classes):
         super(BertNER, self).__init__()
@@ -139,6 +140,7 @@ class DocumentBPEContextBertNER(nn.Module):
 
         return predictions
 
+
 class DocumentWordContextBertNER(nn.Module):
     def __init__(self, num_classes, device):
         super(DocumentWordContextBertNER, self).__init__()
@@ -173,7 +175,8 @@ class DocumentWordContextBertNER(nn.Module):
 
         return words
 
-    def forward(self, batch, documents_ids, sentences_ids, mean_embeddings_for_batch_documents, sentences_from_documents):
+    def forward(self, batch, documents_ids, sentences_ids, mean_embeddings_for_batch_documents,
+                sentences_from_documents):
         last_hidden_state = self.bert(batch)[0]
         additional_context = torch.zeros_like(last_hidden_state, requires_grad=False)
 
@@ -194,12 +197,26 @@ class DocumentWordContextBertNER(nn.Module):
 
                 word_positions = words_from_sentences[word]['positions']
 
-                if len(word_positions) == 1:
-                    position = word_positions[0]
-                    additional_context[batch_element_id][position] = context_vector
+                if word_bpe != '[PAD]':
+                    if len(word_positions) == 1:
+                        position = word_positions[0]
+                        # print(batch_element_id, position, word_bpe)
+                        additional_context[batch_element_id][position] = context_vector
+                    else:
+                        for bpe_token_relative_pos, position_in_sentence in enumerate(word_positions):
+                            additional_context[batch_element_id][position_in_sentence] = context_vector[
+                                bpe_token_relative_pos]
                 else:
-                    for bpe_token_relative_pos, position_in_sentence in enumerate(word_positions):
-                        additional_context[batch_element_id][position_in_sentence] = context_vector[bpe_token_relative_pos]
+                    for idx in range(word_positions[0], len(tokens)):
+                        additional_context[batch_element_id][idx] = context_vector
+
+                    for key in words_from_document:
+                        if words_from_document[key]['bpe'] == ['[SEP]']:
+                            context_vector = words_from_document[key]['context_vector']
+                            additional_context[batch_element_id][-1] = context_vector
+                            break
+
+                break
 
         additional_context = additional_context.to(self.device)
         hidden_state_with_context = torch.cat((last_hidden_state, additional_context), 2)
