@@ -19,6 +19,7 @@ def train_epoch(model, criterion, optimizer, data, tag2idx, idx2tag, device, doc
             tags = batch[1].to(device)
             masks = batch[2]
             document_ids = batch[3]
+            sentences_ids = batch[4]
 
             if documents:
                 for param in model.bert.parameters():
@@ -26,18 +27,19 @@ def train_epoch(model, criterion, optimizer, data, tag2idx, idx2tag, device, doc
 
                 documents_set = set(document_ids)
 
-                mean_embeddings_per_document = {}
+                mean_embeddings_for_batch_documents = {}
+                sentences_from_documents = {}
 
                 for document_id in documents_set:
-                    mean_embeddings_per_document[document_id] = model.get_document_context(
-                        documents[document_id].to(device))
+                    mean_embeddings_for_batch_documents[document_id] = model.get_document_context(documents[document_id].to(device))
+                    sentences_from_documents[document_id] = documents.get_document_words_by_sentences(document_id)
 
-            for param in model.bert.parameters():
-                param.requires_grad = True
+                for param in model.bert.parameters():
+                    param.requires_grad = True
 
             batch_element_length = len(tags[0])
 
-            predictions = model(tokens, document_ids, mean_embeddings_per_document)
+            predictions = model(tokens, document_ids, sentences_ids, mean_embeddings_for_batch_documents, sentences_from_documents)
             predictions = predictions.view(-1, predictions.shape[-1])
 
             tags_mask = tags != tag2idx['[PAD]']
@@ -102,6 +104,7 @@ def eval_epoch(model, criterion, data, tag2idx, idx2tag, device, documents=None,
                 tags = batch[1].to(device)
                 masks = batch[2]
                 document_ids = batch[3]
+                sentences_ids = batch[4]
 
                 if documents:
                     for param in model.bert.parameters():
@@ -109,18 +112,21 @@ def eval_epoch(model, criterion, data, tag2idx, idx2tag, device, documents=None,
 
                     documents_set = set(document_ids)
 
-                    mean_embeddings_per_document = {}
+                    mean_embeddings_for_batch_documents = {}
+                    sentences_from_documents = {}
 
                     for document_id in documents_set:
-                        mean_embeddings_per_document[document_id] = model.get_document_context(
+                        mean_embeddings_for_batch_documents[document_id] = model.get_document_context(
                             documents[document_id].to(device))
+                        sentences_from_documents[document_id] = documents.get_document_words_by_sentences(document_id)
 
-                for param in model.bert.parameters():
-                    param.requires_grad = True
+                    for param in model.bert.parameters():
+                        param.requires_grad = True
 
                 batch_element_length = len(tags[0])
 
-                predictions = model(tokens, document_ids, mean_embeddings_per_document)
+                predictions = model(tokens, document_ids, sentences_ids, mean_embeddings_for_batch_documents,
+                                    sentences_from_documents)
                 predictions = predictions.view(-1, predictions.shape[-1])
                 tags_mask = tags != tag2idx['[PAD]']
                 tags_mask = tags_mask.view(-1)
@@ -178,6 +184,7 @@ def test_model(model, criterion, data, tag2idx, idx2tag, device, documents=None)
                 tags = batch[1].to(device)
                 masks = batch[2]
                 document_ids = batch[3]
+                sentences_ids = batch[4]
 
                 if documents:
                     for param in model.bert.parameters():
@@ -185,18 +192,21 @@ def test_model(model, criterion, data, tag2idx, idx2tag, device, documents=None)
 
                     documents_set = set(document_ids)
 
-                    mean_embeddings_per_document = {}
+                    mean_embeddings_for_batch_documents = {}
+                    sentences_from_documents = {}
 
                     for document_id in documents_set:
-                        mean_embeddings_per_document[document_id] = model.get_document_context(
+                        mean_embeddings_for_batch_documents[document_id] = model.get_document_context(
                             documents[document_id].to(device))
+                        sentences_from_documents[document_id] = documents.get_document_words_by_sentences(document_id)
 
-                for param in model.bert.parameters():
-                    param.requires_grad = True
+                    for param in model.bert.parameters():
+                        param.requires_grad = True
 
                 batch_element_length = len(tags[0])
 
-                predictions = model(tokens, document_ids, mean_embeddings_per_document)
+                predictions = model(tokens, document_ids, sentences_ids, mean_embeddings_for_batch_documents,
+                                    sentences_from_documents)
                 predictions = predictions.view(-1, predictions.shape[-1])
                 tags_mask = tags != tag2idx['[PAD]']
                 tags_mask = tags_mask.view(-1)

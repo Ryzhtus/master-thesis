@@ -133,3 +133,13 @@ class Document(Dataset):
                     word_id += 1
 
         return words
+
+    def get_document_words_by_sentences(self, item):
+        document = self.get_document_tokens(item)
+
+        document_words_by_sentences = {}
+
+        for sentence_id, sentence in enumerate(document):
+            document_words_by_sentences[sentence_id] = self.find_token_positions_for_each_word(sentence)
+
+        return document_words_by_sentences

@@ -173,16 +173,33 @@ class DocumentWordContextBertNER(nn.Module):
 
         return words
 
-    def forward(self, batch, documents_ids, sentences_ids, mean_embeddings):
+    def forward(self, batch, documents_ids, sentences_ids, mean_embeddings_for_batch_documents, sentences_from_documents):
         last_hidden_state = self.bert(batch)[0]
         additional_context = torch.zeros_like(last_hidden_state, requires_grad=False)
 
         for batch_element_id, tokens in enumerate(batch):
             document_id = documents_ids[batch_element_id]
             sentence_id = sentences_ids[batch_element_id]
-            for token_id, token in enumerate(tokens):
-                token = token.item()
-                additional_context[batch_element_id][token_id] = mean_embeddings[document_id][token]
+
+            words_from_sentences = sentences_from_documents[document_id][sentence_id]
+            words_from_document = mean_embeddings_for_batch_documents[document_id]
+
+            for word in words_from_sentences:
+                word_bpe = words_from_sentences[word]['bpe']
+
+                for key in words_from_document:
+                    if words_from_document[key]['bpe'] == word_bpe:
+                        context_vector = words_from_document[key]['context_vector']
+                        break
+
+                word_positions = words_from_sentences[word]['positions']
+
+                if len(word_positions) == 1:
+                    position = word_positions[0]
+                    additional_context[batch_element_id][position] = context_vector
+                else:
+                    for bpe_token_relative_pos, position_in_sentence in enumerate(word_positions):
+                        additional_context[batch_element_id][position_in_sentence] = context_vector[bpe_token_relative_pos]
 
         additional_context = additional_context.to(self.device)
         hidden_state_with_context = torch.cat((last_hidden_state, additional_context), 2)

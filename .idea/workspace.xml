@@ -5,13 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/named_entity_recognition/train_document_word_context.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/named_entity_recognition/dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/dataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bpe_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/bpe_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/named_entity_recognition/document.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/document.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/named_entity_recognition/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/named_entity_recognition/reader.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/reader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/named_entity_recognition/train_context.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/train_document_bpe_context.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/named_entity_recognition/train_document_word_context.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/train_document_word_context.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/named_entity_recognition/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -282,7 +280,7 @@
       <workItem from="1623143514675" duration="4000" />
       <workItem from="1623163154436" duration="5239000" />
       <workItem from="1623233055610" duration="11379000" />
-      <workItem from="1623317731712" duration="1578000" />
+      <workItem from="1623317731712" duration="6599000" />
     </task>
     <servers />
   </component>
@@ -301,7 +299,7 @@
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$run.coverage" NAME="run Coverage Results" MODIFIED="1612985863067" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/named_entity_recognition" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$pytest_in_test_document_iterator_py.coverage" NAME="pytest in test_document_iterator.py Coverage Results" MODIFIED="1619697023495" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$documents_in_batch_distribution.coverage" NAME="documents_in_batch_distribution Coverage Results" MODIFIED="1622115413554" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/named_entity_recognition" />
-    <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$bpe_test.coverage" NAME="bpe_test Coverage Results" MODIFIED="1623321271802" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$bpe_test.coverage" NAME="bpe_test Coverage Results" MODIFIED="1623328170140" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$pytest_for_test_repeated_entities_MyTestCase_test_lengths_after_processing.coverage" NAME="pytest for test_repeated_entities.MyTestCase.test_lengths_after_processing Coverage Results" MODIFIED="1612969642516" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$pytest_for_test_repeated_entities_RepeatedEntitiesTest_test_lengths_after_processing.coverage" NAME="pytest for test_repeated_entities.RepeatedEntitiesTest.test_lengths_after_processing Coverage Results" MODIFIED="1612973712236" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$pytest_for_test_iterator_DocumentIteratorTest_test_batches.coverage" NAME="pytest for test_iterator.DocumentIteratorTest.test_batches Coverage Results" MODIFIED="1619693382191" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />

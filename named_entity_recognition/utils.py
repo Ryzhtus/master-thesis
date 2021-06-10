@@ -24,8 +24,8 @@ def create_dataset_and_standard_dataloader(dataset_name: str, filename: str, bat
 def create_dataset_and_document_dataloader(dataset_name: str, filename: str, batch_size: int, shuffle: bool, tokenizer):
     if dataset_name == 'conll':
         reader = ReaderDocumentCoNLL()
-        sentences, tags, masks, document2sentences = reader.get_sentences(filename)
-        dataset = SentencesPlusDocumentsDataset(sentences, tags, masks, document2sentences, tokenizer)
+        sentences, tags, masks, document2sentences, sentence2position_in_document = reader.get_sentences(filename)
+        dataset = SentencesPlusDocumentsDataset(sentences, tags, masks, document2sentences, sentence2position_in_document, tokenizer)
         documents = Document(sentences, document2sentences, tokenizer)
         return dataset, documents, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
