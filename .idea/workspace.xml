@@ -7,7 +7,6 @@
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/named_entity_recognition/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/named_entity_recognition/train_document_word_context.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/train_document_word_context.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -278,7 +277,8 @@
       <workItem from="1623163154436" duration="5239000" />
       <workItem from="1623233055610" duration="11379000" />
       <workItem from="1623317731712" duration="6655000" />
-      <workItem from="1623334942759" duration="1251000" />
+      <workItem from="1623334942759" duration="1876000" />
+      <workItem from="1623402647005" duration="631000" />
     </task>
     <servers />
   </component>

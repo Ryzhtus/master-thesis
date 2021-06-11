@@ -192,7 +192,10 @@ class DocumentWordContextBertNER(nn.Module):
 
                 for key in words_from_document:
                     if words_from_document[key]['bpe'] == word_bpe:
-                        context_vector = words_from_document[key]['context_vector']
+                        if len(words_from_document[key]['pos']) == 1:
+                            context_vector = torch.zeros(768)
+                        else:
+                            context_vector = words_from_document[key]['context_vector']
                         break
 
                 word_positions = words_from_sentences[word]['positions']
