@@ -178,7 +178,7 @@ class DocumentWordContextBertNER(nn.Module):
     def forward(self, batch, documents_ids, sentences_ids, mean_embeddings_for_batch_documents,
                 sentences_from_documents):
         last_hidden_state = self.bert(batch)[0]
-        additional_context = torch.zeros_like(last_hidden_state, requires_grad=False)
+        additional_context = last_hidden_state.clone()
 
         for batch_element_id, tokens in enumerate(batch):
             document_id = documents_ids[batch_element_id]
@@ -190,36 +190,39 @@ class DocumentWordContextBertNER(nn.Module):
             for word in words_from_sentences:
                 word_bpe = words_from_sentences[word]['bpe']
 
+                once_seen = False
                 for key in words_from_document:
                     if words_from_document[key]['bpe'] == word_bpe:
                         if len(words_from_document[key]['pos']) == 1:
-                            context_vector = torch.zeros(768)
+                            once_seen = True
                         else:
                             context_vector = words_from_document[key]['context_vector']
                         break
 
-                word_positions = words_from_sentences[word]['positions']
-
-                if word_bpe != '[PAD]':
-                    if len(word_positions) == 1:
-                        position = word_positions[0]
-                        # print(batch_element_id, position, word_bpe)
-                        additional_context[batch_element_id][position] = context_vector
-                    else:
-                        for bpe_token_relative_pos, position_in_sentence in enumerate(word_positions):
-                            additional_context[batch_element_id][position_in_sentence] = context_vector[
-                                bpe_token_relative_pos]
+                if once_seen == True:
+                    pass
                 else:
-                    for idx in range(word_positions[0], len(tokens)):
-                        additional_context[batch_element_id][idx] = context_vector
+                    word_positions = words_from_sentences[word]['positions']
 
-                    for key in words_from_document:
-                        if words_from_document[key]['bpe'] == ['[SEP]']:
-                            context_vector = words_from_document[key]['context_vector']
-                            additional_context[batch_element_id][-1] = context_vector
-                            break
+                    if word_bpe != '[PAD]':
+                        if len(word_positions) == 1:
+                            position = word_positions[0]
+                            additional_context[batch_element_id][position] = context_vector
+                        else:
+                            for bpe_token_relative_pos, position_in_sentence in enumerate(word_positions):
+                                additional_context[batch_element_id][position_in_sentence] = context_vector[
+                                    bpe_token_relative_pos]
+                    else:
+                        for idx in range(word_positions[0], len(tokens)):
+                            additional_context[batch_element_id][idx] = context_vector
 
-                break
+                        for key in words_from_document:
+                            if words_from_document[key]['bpe'] == ['[SEP]']:
+                                context_vector = words_from_document[key]['context_vector']
+                                additional_context[batch_element_id][-1] = context_vector
+                                break
+
+                    break
 
         additional_context = additional_context.to(self.device)
         hidden_state_with_context = torch.cat((last_hidden_state, additional_context), 2)
@@ -227,5 +230,6 @@ class DocumentWordContextBertNER(nn.Module):
         predictions = self.lstm(hidden_state_with_context)[0]
         predictions = self.dropout(predictions)
         predictions = self.linear(predictions)
+        #predictions = self.linear(hidden_state_with_context)
 
         return predictions
