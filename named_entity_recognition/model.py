@@ -230,6 +230,5 @@ class DocumentWordContextBertNER(nn.Module):
         predictions = self.lstm(hidden_state_with_context)[0]
         predictions = self.dropout(predictions)
         predictions = self.linear(predictions)
-        #predictions = self.linear(hidden_state_with_context)
 
         return predictions
