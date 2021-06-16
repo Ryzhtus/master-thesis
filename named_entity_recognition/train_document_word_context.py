@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 
 def train_epoch(model, criterion, optimizer, data, tag2idx, idx2tag, device, documents=None,
-                scheduler=None, clip_grad=False, last_epoch=False, name=None):
+                scheduler=None, clip_grad=False, name=None):
     epoch_loss = 0
     epoch_metrics = FMeasureStorage()
     epoch_repeated_entities_accuracy = AccuracyStorage()
@@ -36,10 +36,6 @@ def train_epoch(model, criterion, optimizer, data, tag2idx, idx2tag, device, doc
 
                 for param in model.bert.parameters():
                     param.requires_grad = True
-
-            if last_epoch:
-                for param in model.bert.parameters():
-                    param.requires_grad = False
 
             batch_element_length = len(tags[0])
 
@@ -256,10 +252,6 @@ def train_model(model, criterion, optimizer, train_data, eval_data, train_docume
                 device, clip_grad, scheduler, epochs=1):
     for epoch in range(epochs):
         name_prefix = '[{} / {}] '.format(epoch + 1, epochs)
-        if epoch == (epochs - 1):
-            train_epoch(model, criterion, optimizer, train_data, tag2idx, idx2tag, device, train_documents,
-                        scheduler, clip_grad, True, name_prefix + 'Train:')
-        else:
-            train_epoch(model, criterion, optimizer, train_data, tag2idx, idx2tag, device, train_documents,
-                        scheduler, clip_grad, False, name_prefix + 'Train:')
+        train_epoch(model, criterion, optimizer, train_data, tag2idx, idx2tag, device, train_documents,
+                    scheduler, clip_grad, name_prefix + 'Train:')
         eval_epoch(model, criterion, eval_data, tag2idx, idx2tag, device, eval_documents, name_prefix + 'Eval :')
