@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 
 def train_epoch(model, criterion, optimizer, data, tag2idx, idx2tag, device, documents=None,
-                scheduler=None, clip_grad=False, name=None):
+                scheduler=None, clip_grad=False, last_epoch=False, name=None):
     epoch_loss = 0
     epoch_metrics = FMeasureStorage()
     epoch_repeated_entities_accuracy = AccuracyStorage()
@@ -34,6 +34,7 @@ def train_epoch(model, criterion, optimizer, data, tag2idx, idx2tag, device, doc
                     mean_embeddings_for_batch_documents[document_id] = model.get_document_context(documents[document_id].to(device), documents.collect_all_positions_for_each_word(document_id))
                     sentences_from_documents[document_id] = documents.get_document_words_by_sentences(document_id)
 
+            if not last_epoch:
                 for param in model.bert.parameters():
                     param.requires_grad = True
 
@@ -88,6 +89,8 @@ def train_epoch(model, criterion, optimizer, data, tag2idx, idx2tag, device, doc
                                                                                                       data),
                                                                                                   epoch_f1_score,
                                                                                                   epoch_accuracy))
+
+    return epoch_loss / len(data)
 
 
 def eval_epoch(model, criterion, data, tag2idx, idx2tag, device, documents=None, name=None):
@@ -166,6 +169,8 @@ def eval_epoch(model, criterion, data, tag2idx, idx2tag, device, documents=None,
                                                                                                           data),
                                                                                                       epoch_f1_score,
                                                                                                       epoch_accuracy))
+
+    return epoch_loss / len(data)
 
 
 def test_model(model, criterion, data, tag2idx, idx2tag, device, documents=None):
@@ -250,8 +255,28 @@ def test_model(model, criterion, data, tag2idx, idx2tag, device, documents=None)
 
 def train_model(model, criterion, optimizer, train_data, eval_data, train_documents, eval_documents, tag2idx, idx2tag,
                 device, clip_grad, scheduler, epochs=1):
+    train_loss = []
+    eval_loss = []
+    use_scheduler = False
+
     for epoch in range(epochs):
         name_prefix = '[{} / {}] '.format(epoch + 1, epochs)
-        train_epoch(model, criterion, optimizer, train_data, tag2idx, idx2tag, device, train_documents,
-                    scheduler, clip_grad, name_prefix + 'Train:')
-        eval_epoch(model, criterion, eval_data, tag2idx, idx2tag, device, eval_documents, name_prefix + 'Eval :')
+
+        if epoch == (epochs - 1):
+            train_loss.append(train_epoch(model, criterion, optimizer, train_data, tag2idx, idx2tag, device, train_documents,
+                        None, clip_grad, True, name_prefix + 'Train:'))
+        else:
+            if use_scheduler:
+                train_epoch(model, criterion, optimizer, train_data, tag2idx, idx2tag, device, train_documents,
+                            scheduler, clip_grad, False, name_prefix + 'Train:')
+            else:
+                train_epoch(model, criterion, optimizer, train_data, tag2idx, idx2tag, device, train_documents,
+                            None, clip_grad, False, name_prefix + 'Train:')
+
+        eval_loss.append(eval_epoch(model, criterion, eval_data, tag2idx, idx2tag, device, eval_documents, name_prefix + 'Eval :'))
+
+        if epoch > (epochs // 2):
+            if eval_loss[-1] < eval_loss[-2]:
+                use_scheduler = True
+            else:
+                use_scheduler = False
