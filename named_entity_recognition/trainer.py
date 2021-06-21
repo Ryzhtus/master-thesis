@@ -13,7 +13,7 @@ import torch.optim.optimizer
 
 
 class Trainer():
-    def __init__(self, model, params: dict,
+    def __init__(self, experiment, model, params: dict,
                  optimizer, criterion, scheduler, clip_grad: bool,
                  epochs: int, last_epoch: bool,
                  train_data: torch.utils.data.DataLoader,
@@ -48,7 +48,7 @@ class Trainer():
 
         self.device = device
 
-        self.experiment = Experiment(project_name='ner-with-nonlocal-features')
+        self.experiment = experiment
         self.experiment.log_parameters(self.params)
 
         self.train_loss = []
