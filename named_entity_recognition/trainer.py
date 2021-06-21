@@ -4,7 +4,7 @@ from named_entity_recognition.metrics import FMeasureStorage, AccuracyStorage
 from named_entity_recognition.utils import clear_tags
 from seqeval.metrics import performance_measure
 from tqdm import tqdm
-from document import Document
+from named_entity_recognition.document import Document
 
 import torch
 import torch.nn as nn
