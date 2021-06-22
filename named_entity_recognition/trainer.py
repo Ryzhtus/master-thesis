@@ -1,4 +1,4 @@
-from comet_ml import Experiment
+import comet_ml
 
 from named_entity_recognition.metrics import FMeasureStorage, AccuracyStorage
 from named_entity_recognition.utils import clear_tags
@@ -13,7 +13,7 @@ import torch.optim.optimizer
 
 
 class Trainer():
-    def __init__(self, experiment, model, params: dict,
+    def __init__(self, experiment: comet_ml.Experiment, model, params: dict,
                  optimizer, criterion, scheduler, clip_grad: bool,
                  epochs: int, last_epoch: bool,
                  train_data: torch.utils.data.DataLoader,
@@ -159,6 +159,11 @@ class Trainer():
                 progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
                                                                        epoch_f1_score, epoch_accuracy))
 
+                self.experiment.log_metric("Train F1", epoch_f1_score)
+                self.experiment.log_metric("Train Recall", epoch_recall)
+                self.experiment.log_metric("Train Precision", epoch_precision)
+                self.experiment.log_metric("Train RE Accuracy", epoch_accuracy)
+
             self.train_loss.append(epoch_loss / len(self.train_data))
 
     def __eval_epoch(self, name):
@@ -197,6 +202,11 @@ class Trainer():
                 progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.eval_data),
                                                                        epoch_f1_score, epoch_accuracy))
 
+                self.experiment.log_metric("Validation F1", epoch_f1_score)
+                self.experiment.log_metric("Validation Recall", epoch_recall)
+                self.experiment.log_metric("Validation Precision", epoch_precision)
+                self.experiment.log_metric("Validation Accuracy", epoch_accuracy)
+
             self.eval_loss.append(epoch_loss / len(self.eval_data))
 
     def __test_epoch(self, name):
@@ -234,6 +244,11 @@ class Trainer():
                 epoch_accuracy = epoch_repeated_entities_accuracy.report()
                 progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.test_data),
                                                                        epoch_f1_score, epoch_accuracy))
+
+                self.experiment.log_metric("Test F1", epoch_f1_score)
+                self.experiment.log_metric("Test Recall", epoch_recall)
+                self.experiment.log_metric("Test Precision", epoch_precision)
+                self.experiment.log_metric("Test RE Accuracy", epoch_accuracy)
 
             self.test_loss.append(epoch_loss / len(self.test_data))
 

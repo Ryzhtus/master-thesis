@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/named_entity_recognition/run.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/named_entity_recognition/trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/named_entity_recognition/trainer.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -282,7 +283,9 @@
       <workItem from="1623831758161" duration="8240000" />
       <workItem from="1623929772812" duration="1850000" />
       <workItem from="1623932958062" duration="1330000" />
-      <workItem from="1624280828934" duration="9253000" />
+      <workItem from="1624280828934" duration="10601000" />
+      <workItem from="1624364630901" duration="1021000" />
+      <workItem from="1624377208892" duration="518000" />
     </task>
     <servers />
   </component>
