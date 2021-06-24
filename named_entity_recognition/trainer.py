@@ -14,7 +14,7 @@ import torch.optim.optimizer
 
 class Trainer():
     def __init__(self, experiment: comet_ml.Experiment, model, params: dict,
-                 optimizer, criterion, scheduler, clip_grad: bool,
+                 optimizer, criterion, scheduler, use_scheduler: bool, clip_grad: bool,
                  epochs: int, last_epoch: bool,
                  train_data: torch.utils.data.DataLoader,
                  eval_data: torch.utils.data.DataLoader,
@@ -30,6 +30,7 @@ class Trainer():
         self.optimizer = optimizer
         self.criterion = criterion
         self.scheduler = scheduler
+        self.use_scheduler = use_scheduler
         self.clip_grad = clip_grad
 
         self.epochs = epochs
@@ -58,9 +59,13 @@ class Trainer():
         self.progress_info = '{:>5s} Loss = {:.5f}, F1-score = {:.2%}, Repeated Entities Accuracy = {:.2%}'
 
     def __step(self, tokens, tags, masks, document_ids=None, sentences_ids=None,
-               mean_embeddings_for_batch_documents=None, sentences_from_documents=None):
+               mean_embeddings_for_batch_documents=None, sentences_from_documents=None, freeze_bert=False):
 
         batch_element_length = len(tags[0])
+
+        if freeze_bert:
+            for param in self.model.bert.parameters():
+                param.requires_grad = False
 
         if document_ids and sentences_ids and mean_embeddings_for_batch_documents and sentences_from_documents:
             predictions = self.model(tokens, document_ids, sentences_ids, mean_embeddings_for_batch_documents,
@@ -114,7 +119,7 @@ class Trainer():
 
         return mean_embeddings_for_batch_documents, sentences_from_documents
 
-    def __train_epoch(self, name):
+    def __train_epoch(self, name, use_scheduler=False, freeze_bert=False):
         epoch_loss = 0
         epoch_metrics = FMeasureStorage()
         epoch_repeated_entities_accuracy = AccuracyStorage()
@@ -134,9 +139,9 @@ class Trainer():
                             document_ids, self.train_documents)
                         loss, step_f1, step_re_accuracy = self.__step(tokens, tags, masks, document_ids,
                                                                       sentences_ids, mean_document_word_vectors,
-                                                                      sentences_from_documents)
+                                                                      sentences_from_documents, freeze_bert)
                     else:
-                        loss, step_f1, step_re_accuracy = self.__step(tokens, tags, masks)
+                        loss, step_f1, step_re_accuracy = self.__step(tokens, tags, masks, freeze_bert=freeze_bert)
 
                     epoch_metrics + step_f1
                     epoch_repeated_entities_accuracy + step_re_accuracy
@@ -147,7 +152,7 @@ class Trainer():
                     if self.clip_grad:
                         nn.utils.clip_grad_norm_(self.model.parameters(), 1)
                     self.optimizer.step()
-                    if self.scheduler:
+                    if use_scheduler and self.scheduler:
                         self.scheduler.step()
                     torch.cuda.empty_cache()
 
@@ -257,6 +262,20 @@ class Trainer():
             progress = '[{} / {}] '.format(epoch + 1, self.epochs)
             self.__train_epoch(progress + 'Train:')
             self.__eval_epoch(progress + 'Eval :')
+
+            if epoch == (self.epochs - 1):
+                if self.last_epoch:
+                    self.__train_epoch(progress + 'Train:', freeze_bert=True)
+            else:
+                self.__train_epoch(progress + 'Train:')
+
+            self.__eval_epoch(progress + 'Eval :')
+
+            if epoch > (self.epochs // 2):
+                if self.eval_loss[-1] < self.eval_loss[-2]:
+                    self.use_scheduler = True
+                else:
+                    self.use_scheduler = False
 
     def test(self):
         self.__test_epoch('Test :')
