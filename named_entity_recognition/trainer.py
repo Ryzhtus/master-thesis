@@ -14,7 +14,7 @@ import torch.optim.optimizer
 
 class Trainer():
     def __init__(self, experiment: comet_ml.Experiment, model, params: dict,
-                 optimizer, criterion, scheduler, use_scheduler: bool, clip_grad: bool,
+                 optimizer, criterion, scheduler, clip_grad: bool,
                  epochs: int, last_epoch: bool,
                  train_data: torch.utils.data.DataLoader,
                  eval_data: torch.utils.data.DataLoader,
@@ -30,7 +30,6 @@ class Trainer():
         self.optimizer = optimizer
         self.criterion = criterion
         self.scheduler = scheduler
-        self.use_scheduler = use_scheduler
         self.clip_grad = clip_grad
 
         self.epochs = epochs
@@ -119,7 +118,7 @@ class Trainer():
 
         return mean_embeddings_for_batch_documents, sentences_from_documents
 
-    def __train_epoch(self, name, use_scheduler=False, freeze_bert=False):
+    def __train_epoch(self, name, freeze_bert=False):
         epoch_loss = 0
         epoch_metrics = FMeasureStorage()
         epoch_repeated_entities_accuracy = AccuracyStorage()
@@ -152,7 +151,7 @@ class Trainer():
                     if self.clip_grad:
                         nn.utils.clip_grad_norm_(self.model.parameters(), 1)
                     self.optimizer.step()
-                    if use_scheduler and self.scheduler:
+                    if self.scheduler:
                         self.scheduler.step()
                     torch.cuda.empty_cache()
 
@@ -270,12 +269,6 @@ class Trainer():
                 self.__train_epoch(progress + 'Train:')
 
             self.__eval_epoch(progress + 'Eval :')
-
-            if epoch > (self.epochs // 2):
-                if self.eval_loss[-1] < self.eval_loss[-2]:
-                    self.use_scheduler = True
-                else:
-                    self.use_scheduler = False
 
     def test(self):
         self.__test_epoch('Test :')
