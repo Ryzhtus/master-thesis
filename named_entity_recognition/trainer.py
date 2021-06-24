@@ -260,12 +260,12 @@ class Trainer():
     def fit(self):
         for epoch in range(self.epochs):
             progress = '[{} / {}] '.format(epoch + 1, self.epochs)
-            self.__train_epoch(progress + 'Train:')
-            self.__eval_epoch(progress + 'Eval :')
 
             if epoch == (self.epochs - 1):
                 if self.last_epoch:
                     self.__train_epoch(progress + 'Train:', freeze_bert=True)
+                else:
+                    self.__train_epoch(progress + 'Train:')
             else:
                 self.__train_epoch(progress + 'Train:')
 
