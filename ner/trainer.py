@@ -1,10 +1,10 @@
 import comet_ml
 
-from named_entity_recognition.metrics import FMeasureStorage, AccuracyStorage
-from named_entity_recognition.utils import clear_tags
+from ner.metrics import FMeasureStorage, AccuracyStorage
+from ner.utils import clear_tags
 from seqeval.metrics import performance_measure
 from tqdm import tqdm
-from named_entity_recognition.document import Document
+from ner.document import Document
 
 import torch
 import torch.nn as nn

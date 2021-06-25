@@ -1,4 +1,4 @@
-from named_entity_recognition.utils import create_dataset_and_document_dataloader
+from ner.utils import create_dataset_and_document_dataloader
 from transformers import BertTokenizer
 import matplotlib.pyplot as plt
 

@@ -1,47 +1,45 @@
-from named_entity_recognition.reader import ReaderCoNLL, ReaderOntonotes, ReaderDocumentCoNLL, ReaderDocumentOntonotes
-from named_entity_recognition.dataset import CoNLLDataset, SentencesDataset, SentencesPlusDocumentsDataset
-from named_entity_recognition.iterator import DocumentBatchIterator
-from named_entity_recognition.document import Document
-
-import torch
+from ner.reader import ReaderCoNLL, ReaderOntonotes
+from ner.dataset import CoNLLDataset, SentencesDataset, SentencesPlusDocumentsDataset
+from ner.iterator import DocumentBatchIterator
+from ner.document import Document
 from torch.utils.data import DataLoader
 
 
 def create_dataset_and_standard_dataloader(dataset_name: str, filename: str, batch_size: int, shuffle: bool, tokenizer):
     if dataset_name == 'conll':
         reader = ReaderCoNLL()
-        sentences, tags, masks = reader.get_sentences(filename)
+        sentences, tags, masks = reader.read(filename)
         dataset = CoNLLDataset(sentences, tags, masks, tokenizer)
         return dataset, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
     if dataset_name == 'ontonotes':
         reader = ReaderOntonotes()
-        sentences, tags, masks = reader.get_sentences(filename)
+        sentences, tags, masks = reader.read(filename)
         dataset = CoNLLDataset(sentences, tags, masks, tokenizer)
         return dataset, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
 
 def create_dataset_and_document_dataloader(dataset_name: str, filename: str, batch_size: int, shuffle: bool, tokenizer):
     if dataset_name == 'conll':
-        reader = ReaderDocumentCoNLL()
-        sentences, tags, masks, document2sentences, sentence2position_in_document = reader.get_sentences(filename)
-        dataset = SentencesPlusDocumentsDataset(sentences, tags, masks, document2sentences, sentence2position_in_document, tokenizer)
-        documents = Document(sentences, document2sentences, tokenizer)
+        reader = ReaderCoNLL(include_document_ids=True)
+        sentences, tags, masks, document_to_sentences, sentence_to_document_to_position = reader.read(filename)
+        dataset = SentencesPlusDocumentsDataset(sentences, tags, masks, document_to_sentences, sentence_to_document_to_position, tokenizer)
+        documents = Document(sentences, document_to_sentences, tokenizer)
         return dataset, documents, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
     if dataset_name == 'ontonotes':
-        reader = ReaderDocumentOntonotes()
-        sentences, tags, masks, document2sentences = reader.get_sentences(filename)
-        dataset = SentencesPlusDocumentsDataset(sentences, tags, masks, document2sentences, tokenizer)
-        documents = Document(sentences, document2sentences, tokenizer)
+        reader = ReaderOntonotes(include_document_ids=True)
+        sentences, tags, masks, document_to_sentences, sentence_to_document_to_position = reader.read(filename)
+        dataset = SentencesPlusDocumentsDataset(sentences, tags, masks, document_to_sentences, sentence_to_document_to_position, tokenizer)
+        documents = Document(sentences, document_to_sentences, tokenizer)
         return dataset, documents, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
 
 def create_dataset_and_document_level_iterator(dataset_name: str, filename: str, group_documents: bool,
                                                batch_size: int, tokenizer):
     if dataset_name == 'conll':
-        reader = ReaderDocumentCoNLL()
-        sentences, tags, masks, document2sentences = reader.get_sentences(filename)
+        reader = ReaderCoNLL(include_document_ids=True)
+        sentences, tags, masks, document2sentences = reader.read(filename)
         dataset = SentencesDataset(sentences, tags, masks, tokenizer)
         documents = Document(sentences, document2sentences, tokenizer)
         data_iterator = DocumentBatchIterator(dataset, document2sentences, group_documents=group_documents,
@@ -50,8 +48,8 @@ def create_dataset_and_document_level_iterator(dataset_name: str, filename: str,
         return dataset, documents, data_iterator
 
     if dataset_name == 'ontonotes':
-        reader = ReaderDocumentOntonotes()
-        sentences, tags, masks, document2sentences = reader.get_sentences(filename)
+        reader = ReaderOntonotes(include_document_ids=True)
+        sentences, tags, masks, document2sentences = reader.read(filename)
         dataset = SentencesDataset(sentences, tags, masks, tokenizer)
         data_iterator = DocumentBatchIterator(dataset, document2sentences, shuffle=True)
 
@@ -113,25 +111,3 @@ def clear_tags(labels, predictions, masks, idx2tag, batch_element_length):
     repeated_entities_labels = {'true': masked_true_labels, 'pred': masked_pred_labels}
 
     return clear_labels, clear_predictions, repeated_entities_labels
-
-def calculate_mean_context_vectors(documents, document_id, document_last_hidden_state):
-    words = documents.collect_all_positions_for_each_word(document_id)
-
-    for key in words:
-        current_word = []
-        for pos in words[key]['pos']:
-            sentence_id = pos['sentence_id']
-            if len(pos['ids']) == 1:
-                position = pos['ids']
-                current_word.append(document_last_hidden_state[sentence_id][position])
-            else:
-                position_start = pos['ids'][0]
-                position_end = pos['ids'][-1]
-                current_word.append(document_last_hidden_state[sentence_id][position_start: position_end + 1])
-
-        all_context_vectors_of_a_word = torch.stack(current_word, dim=0)
-        mean_context_vector_of_a_word = torch.mean(all_context_vectors_of_a_word, dim=0)
-
-        words[key]['context_vector'] = mean_context_vector_of_a_word
-
-    return words

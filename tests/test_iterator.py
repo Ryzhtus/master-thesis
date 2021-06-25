@@ -1,8 +1,8 @@
 import unittest
 
-from named_entity_recognition.iterator import DocumentBatchIterator
-from named_entity_recognition.dataset import DatasetDocumentNER
-from named_entity_recognition.reader import ReaderDocumentCoNLL
+from ner.iterator import DocumentBatchIterator
+from ner.dataset import DatasetDocumentNER
+from ner.reader import ReaderDocumentCoNLL
 
 from transformers import BertTokenizer
 
