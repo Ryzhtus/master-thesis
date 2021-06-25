@@ -270,9 +270,10 @@ class ReaderOntonotes():
                 sentences, sentences_tags, sentences_masks = self.__read_document(path + '/' + filename)
 
                 if sentences:
+                    document_to_sentences[document_id] = []
                     sentence_position_in_document = 0
                     for sentence in sentences:
-                        document_to_sentences[document_id] = sentence_id
+                        document_to_sentences[document_id].append(sentence_id)
                         sentences_to_documents_to_positions[sentence_id] = {'document_id': document_id,
                                                                             'sentence_pos_id': sentence_position_in_document}
                         sentence_position_in_document += 1
