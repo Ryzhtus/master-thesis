@@ -68,8 +68,7 @@ class Document(Dataset):
 
         return document_bpe
 
-    @staticmethod
-    def find_token_positions_for_each_word(tokens):
+    def find_token_positions_for_each_word(self, tokens):
         """
         Returns a dict, where keys are words and values are lists with corresponding positions of tokens forming the word
         {0: [0], 1: [1, 2], 2: [3, 4, 5], 3: [6], ...}
