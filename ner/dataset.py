@@ -121,10 +121,10 @@ class SentencesPlusDocumentsDataset(Dataset):
     def paddings(self, batch):
         tokens, tags, masks, attention_masks, words_ids, document_ids, sentences_ids = list(zip(*batch))
 
-        tokens = pad_sequence(tokens, batch_first=True)
-        tags = pad_sequence(tags, batch_first=True)
-        masks = pad_sequence(masks, batch_first=True)
-        attention_masks = pad_sequence(attention_masks, batch_first=True)
+        tokens = pad_sequence(tokens, batch_first=True, padding_value=-100)
+        tags = pad_sequence(tags, batch_first=True, padding_value=-100)
+        masks = pad_sequence(masks, batch_first=True, padding_value=0)
+        attention_masks = pad_sequence(attention_masks, batch_first=True, padding_value=0)
 
         return tokens, tags, masks, attention_masks, words_ids, document_ids, sentences_ids
 
