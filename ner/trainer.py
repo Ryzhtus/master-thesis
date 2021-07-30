@@ -291,7 +291,7 @@ class Trainer():
     def test(self):
         self.__test_epoch('Test :')
 
-        print('Brute F1-score: {}'.format(f1_score(self.test_labels, self.test_predictions, scheme=IOB2)))
+        print('Brute F1-score: {}'.format(f1_score(self.test_labels, self.test_predictions, mode='strict', scheme=IOB2)))
 
         print('Classification Report')
-        print(classification_report(self.test_labels, self.test_predictions, scheme=IOB2))
+        print(classification_report(self.test_labels, self.test_predictions, mode='strict', scheme=IOB2))
