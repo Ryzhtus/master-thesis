@@ -72,8 +72,7 @@ class SentencesPlusDocumentsDataset(Dataset):
 
         self.tokenizer = tokenizer
 
-        self.ner_tags = [self.tokenizer.pad_token] + list(
-            set(tag for tag_list in self.sentences_tags for tag in tag_list))
+        self.ner_tags = list(set(tag for tag_list in self.sentences_tags for tag in tag_list))
         self.tag2idx = {tag: idx for idx, tag in enumerate(self.ner_tags)}
         self.idx2tag = {idx: tag for idx, tag in enumerate(self.ner_tags)}
 
@@ -111,8 +110,7 @@ class SentencesPlusDocumentsDataset(Dataset):
         tokens = [self.tokenizer.cls_token] + tokens + [self.tokenizer.sep_token]
         tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
 
-        tokenized_tags = ['O'] + tokenized_tags + ['O']
-        tags_ids = [self.tag2idx[tag] for tag in tokenized_tags]
+        tags_ids = [-100] + [self.tag2idx[tag] if tag != -100 else tag for tag in tokenized_tags] + [-100]
 
         tokenized_mask = [-1] + tokenized_mask + [-1]
         attention_mask = [1 for token in tokens_ids]
