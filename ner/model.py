@@ -12,8 +12,8 @@ class BertNER(nn.Module):
         self.bert = BertModel.from_pretrained("bert-base-cased")
         self.linear = nn.Linear(self.embedding_dim, self.num_classes)
 
-    def forward(self, tokens):
-        embeddings = self.bert(tokens)[0]
+    def forward(self, input_ids, attention_mask=None):
+        embeddings = self.bert(input_ids=input_ids, attention_mask=attention_mask)[0]
         predictions = self.linear(embeddings)
 
         return predictions
@@ -30,8 +30,8 @@ class BertNERBiLSTM(nn.Module):
         self.linear = nn.Linear(self.embedding_dim * 2, self.num_classes)
         self.dropout = nn.Dropout(0.1)
 
-    def forward(self, tokens):
-        embeddings = self.bert(tokens)[0]
+    def forward(self, input_ids, attention_mask=None):
+        embeddings = self.bert(input_ids=input_ids, attention_mask=attention_mask)[0]
         predictions = self.lstm(embeddings)[0]
         predictions = self.dropout(predictions)
         predictions = self.linear(predictions)

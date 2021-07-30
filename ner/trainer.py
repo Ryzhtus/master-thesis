@@ -2,7 +2,8 @@ import comet_ml
 
 from ner.metrics import FMeasureStorage, AccuracyStorage
 from ner.utils import clear_tags
-from seqeval.metrics import performance_measure, classification_report
+from seqeval.metrics import performance_measure, classification_report, f1_score
+from seqeval.scheme import IOB2
 from tqdm import tqdm
 from ner.document import Document
 
@@ -55,9 +56,12 @@ class Trainer():
         self.eval_loss = []
         self.test_loss = []
 
+        self.test_labels = []
+        self.test_predictions = []
+
         self.progress_info = '{:>5s} Loss = {:.5f}, F1-score = {:.2%}, Repeated Entities Accuracy = {:.2%}'
 
-    def __step(self, tokens, tags, masks, document_ids=None, sentences_ids=None,
+    def __step(self, tokens, tags, attention_masks, masks, test_epoch, document_ids=None, sentences_ids=None,
                mean_embeddings_for_batch_documents=None, sentences_from_documents=None, freeze_bert=False):
 
         batch_element_length = len(tags[0])
@@ -70,11 +74,13 @@ class Trainer():
             predictions = self.model(tokens, document_ids, sentences_ids, mean_embeddings_for_batch_documents,
                                      sentences_from_documents)
         else:
-            predictions = self.model(tokens)
+            predictions = self.model(tokens, attention_masks)
+
+        predictions_for_metrics = predictions.argmax(dim=2).cpu().numpy()
 
         predictions = predictions.view(-1, predictions.shape[-1])
 
-        tags_mask = tags != self.tag2idx['[PAD]']
+        tags_mask = tags != -100
         tags_mask = tags_mask.view(-1)
         labels = torch.where(tags_mask, tags.view(-1), torch.tensor(self.criterion.ignore_index).type_as(tags))
 
@@ -85,17 +91,20 @@ class Trainer():
         predictions = predictions.argmax(dim=1)
 
         predictions = predictions.cpu().numpy()
+        tags = tags.cpu().numpy()
         labels = labels.cpu().numpy()
         masks = masks.cpu().numpy()
 
         # clear <PAD>, CLS and SEP tags from both labels and predictions
-        clear_labels, clear_predictions, clear_repeated_entities_labels = clear_tags(labels, predictions,
-                                                                                     masks, self.idx2tag,
-                                                                                     batch_element_length)
+        clear_labels, clear_predictions = clear_tags(tags, predictions_for_metrics, self.idx2tag)
 
         iteration_result = performance_measure(clear_labels, clear_predictions)
 
-        return loss, iteration_result, clear_repeated_entities_labels
+        if test_epoch:
+            self.test_labels += clear_labels
+            self.test_predictions += clear_predictions
+
+        return loss, iteration_result
 
     def __get_document_word_vectors(self, document_ids: list, documents: Document):
         for param in self.model.bert.parameters():
@@ -130,20 +139,22 @@ class Trainer():
                     tokens = batch[0].to(self.device)
                     tags = batch[1].to(self.device)
                     masks = batch[2]
+                    attention_masks = batch[3].to(self.device)
+                    words_ids = batch[4]
 
                     if self.train_documents:
-                        document_ids = batch[3]
-                        sentences_ids = batch[4]
+                        document_ids = batch[5]
+                        sentences_ids = batch[6]
                         mean_document_word_vectors, sentences_from_documents = self.__get_document_word_vectors(
                             document_ids, self.train_documents)
-                        loss, step_f1, step_re_accuracy = self.__step(tokens, tags, masks, document_ids,
-                                                                      sentences_ids, mean_document_word_vectors,
-                                                                      sentences_from_documents, freeze_bert)
+                        loss, step_f1 = self.__step(tokens, tags, masks, False, document_ids,
+                                                    sentences_ids, mean_document_word_vectors,
+                                                    sentences_from_documents, freeze_bert)
                     else:
-                        loss, step_f1, step_re_accuracy = self.__step(tokens, tags, masks, freeze_bert=freeze_bert)
+                        loss, step_f1 = self.__step(tokens, tags, attention_masks, masks, False, freeze_bert=freeze_bert)
 
                     epoch_metrics + step_f1
-                    epoch_repeated_entities_accuracy + step_re_accuracy
+                    # epoch_repeated_entities_accuracy + step_re_accuracy
                     epoch_loss += loss.item()
 
                     self.optimizer.zero_grad()
@@ -159,7 +170,8 @@ class Trainer():
                     progress_bar.set_description(self.progress_info.format(name, loss.item(), 0, 0))
 
                 epoch_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
-                epoch_accuracy = epoch_repeated_entities_accuracy.report()
+                # epoch_accuracy = epoch_repeated_entities_accuracy.report()
+                epoch_accuracy = 0
                 progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
                                                                        epoch_f1_score, epoch_accuracy))
 
@@ -182,27 +194,30 @@ class Trainer():
                     tokens = batch[0].to(self.device)
                     tags = batch[1].to(self.device)
                     masks = batch[2]
+                    attention_masks = batch[3].to(self.device)
+                    words_ids = batch[4]
 
                     if self.eval_documents:
-                        document_ids = batch[3]
-                        sentences_ids = batch[4]
+                        document_ids = batch[5]
+                        sentences_ids = batch[6]
                         mean_document_word_vectors, sentences_from_documents = self.__get_document_word_vectors(
                             document_ids, self.eval_documents)
-                        loss, step_f1, step_re_accuracy = self.__step(tokens, tags, masks, document_ids,
-                                                                      sentences_ids, mean_document_word_vectors,
-                                                                      sentences_from_documents)
+                        loss, step_f1 = self.__step(tokens, tags, masks, False, document_ids,
+                                                    sentences_ids, mean_document_word_vectors,
+                                                    sentences_from_documents)
                     else:
-                        loss, step_f1, step_re_accuracy = self.__step(tokens, tags, masks)
+                        loss, step_f1 = self.__step(tokens, tags, attention_masks, masks, False)
 
                     epoch_metrics + step_f1
-                    epoch_repeated_entities_accuracy + step_re_accuracy
+                    # epoch_repeated_entities_accuracy + step_re_accuracy
                     epoch_loss += loss.item()
 
                     progress_bar.update()
                     progress_bar.set_description(self.progress_info.format(name, loss.item(), 0, 0))
 
                 epoch_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
-                epoch_accuracy = epoch_repeated_entities_accuracy.report()
+                # epoch_accuracy = epoch_repeated_entities_accuracy.report()
+                epoch_accuracy = 0
                 progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.eval_data),
                                                                        epoch_f1_score, epoch_accuracy))
 
@@ -225,27 +240,30 @@ class Trainer():
                     tokens = batch[0].to(self.device)
                     tags = batch[1].to(self.device)
                     masks = batch[2]
+                    attention_masks = batch[3].to(self.device)
+                    words_ids = batch[4]
 
                     if self.test_documents:
-                        document_ids = batch[3]
-                        sentences_ids = batch[4]
+                        document_ids = batch[5]
+                        sentences_ids = batch[6]
                         mean_document_word_vectors, sentences_from_documents = self.__get_document_word_vectors(
                             document_ids, self.test_documents)
-                        loss, step_f1, step_re_accuracy = self.__step(tokens, tags, masks, document_ids,
-                                                                      sentences_ids, mean_document_word_vectors,
-                                                                      sentences_from_documents)
+                        loss, step_f1 = self.__step(tokens, tags, masks, True, document_ids,
+                                                    sentences_ids, mean_document_word_vectors,
+                                                    sentences_from_documents)
                     else:
-                        loss, step_f1, step_re_accuracy = self.__step(tokens, tags, masks)
+                        loss, step_f1 = self.__step(tokens, tags, attention_masks, masks, True)
 
                     epoch_metrics + step_f1
-                    epoch_repeated_entities_accuracy + step_re_accuracy
+                    # epoch_repeated_entities_accuracy + step_re_accuracy
                     epoch_loss += loss.item()
 
                     progress_bar.update()
                     progress_bar.set_description(self.progress_info.format(name, loss.item(), 0, 0))
 
                 epoch_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
-                epoch_accuracy = epoch_repeated_entities_accuracy.report()
+                # epoch_accuracy = epoch_repeated_entities_accuracy.report()
+                epoch_accuracy = 0
                 progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.test_data),
                                                                        epoch_f1_score, epoch_accuracy))
 
@@ -272,3 +290,8 @@ class Trainer():
 
     def test(self):
         self.__test_epoch('Test :')
+
+        print('Brute F1-score: {}'.format(f1_score(self.test_labels, self.test_predictions, scheme=IOB2)))
+
+        print('Classification Report')
+        print(classification_report(self.test_labels, self.test_predictions, scheme=IOB2))

@@ -55,8 +55,26 @@ def create_dataset_and_document_level_iterator(dataset_name: str, filename: str,
 
         return dataset, data_iterator
 
+def clear_tags(labels, predictions, idx2tag):
+    y_true = []
+    y_pred = []
 
-def clear_tags(labels, predictions, masks, idx2tag, batch_element_length):
+    for label_list, preds_list in zip(labels, predictions):
+        true_tags = label_list != -100
+
+        clear_labels = []
+        clear_predictions = []
+        for idx in range(len(true_tags)):
+            if true_tags[idx] == True:
+                clear_labels.append(idx2tag[label_list[idx]])
+                clear_predictions.append(idx2tag[preds_list[idx]])
+
+        y_true.append(clear_labels)
+        y_pred.append(clear_predictions)
+
+    return y_true, y_pred
+
+def clear_tags_old(labels, predictions, masks, idx2tag, batch_element_length):
     """ this function removes <PAD>, CLS and SEP tags at each sentence
         and convert both ids of tags and batch elements to SeqEval input format
         [[first sentence tags], [second sentence tags], ..., [last sentence tags]]"""
