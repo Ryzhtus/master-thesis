@@ -147,7 +147,7 @@ class Trainer():
                         sentences_ids = batch[6]
                         mean_document_word_vectors, sentences_from_documents = self.__get_document_word_vectors(
                             document_ids, self.train_documents)
-                        loss, step_f1 = self.__step(tokens, tags, masks, False, document_ids,
+                        loss, step_f1 = self.__step(tokens, tags, None, masks, False, document_ids,
                                                     sentences_ids, mean_document_word_vectors,
                                                     sentences_from_documents, freeze_bert)
                     else:
@@ -202,7 +202,7 @@ class Trainer():
                         sentences_ids = batch[6]
                         mean_document_word_vectors, sentences_from_documents = self.__get_document_word_vectors(
                             document_ids, self.eval_documents)
-                        loss, step_f1 = self.__step(tokens, tags, masks, False, document_ids,
+                        loss, step_f1 = self.__step(tokens, tags, None, masks, False, document_ids,
                                                     sentences_ids, mean_document_word_vectors,
                                                     sentences_from_documents)
                     else:
@@ -248,7 +248,7 @@ class Trainer():
                         sentences_ids = batch[6]
                         mean_document_word_vectors, sentences_from_documents = self.__get_document_word_vectors(
                             document_ids, self.test_documents)
-                        loss, step_f1 = self.__step(tokens, tags, masks, True, document_ids,
+                        loss, step_f1 = self.__step(tokens, tags, None, masks, True, document_ids,
                                                     sentences_ids, mean_document_word_vectors,
                                                     sentences_from_documents)
                     else:
