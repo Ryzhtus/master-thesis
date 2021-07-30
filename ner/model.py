@@ -178,7 +178,8 @@ class DocumentContextBertBaseNER(nn.Module):
     def forward(self, batch, documents_ids, sentences_ids, mean_embeddings_for_batch_documents,
                 sentences_from_documents):
         last_hidden_state = self.bert(batch)[0]
-        additional_context = last_hidden_state.clone()
+        additional_context = last_hidden_state.clone().detach()
+        additional_context.requires_grad_(requires_grad=False)
 
         for batch_element_id, tokens in enumerate(batch):
             document_id = documents_ids[batch_element_id]
@@ -271,8 +272,9 @@ class DocumentContextBertLargeNER(nn.Module):
     def forward(self, batch, documents_ids, sentences_ids, mean_embeddings_for_batch_documents,
                 sentences_from_documents):
         last_hidden_state = self.bert(batch)[0]
-        additional_context = last_hidden_state.clone()
-
+        additional_context = last_hidden_state.clone().detach()
+        additional_context.requires_grad_(requires_grad=False)
+        
         for batch_element_id, tokens in enumerate(batch):
             document_id = documents_ids[batch_element_id]
             sentence_id = sentences_ids[batch_element_id]

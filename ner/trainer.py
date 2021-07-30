@@ -2,7 +2,7 @@ import comet_ml
 
 from ner.metrics import FMeasureStorage, AccuracyStorage
 from ner.utils import clear_tags
-from seqeval.metrics import performance_measure
+from seqeval.metrics import performance_measure, classification_report
 from tqdm import tqdm
 from ner.document import Document
 

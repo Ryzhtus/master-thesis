@@ -11,7 +11,8 @@ class CoNLLDataset(Dataset):
 
         self.tokenizer = tokenizer
 
-        self.ner_tags = [self.tokenizer.pad_token] + list(set(tag for tag_list in self.sentences_tags for tag in tag_list))
+        self.ner_tags = [self.tokenizer.pad_token] + list(
+            set(tag for tag_list in self.sentences_tags for tag in tag_list))
         self.tag2idx = {tag: idx for idx, tag in enumerate(self.ner_tags)}
         self.idx2tag = {idx: tag for idx, tag in enumerate(self.ner_tags)}
 
@@ -58,7 +59,8 @@ class CoNLLDataset(Dataset):
 
 
 class SentencesPlusDocumentsDataset(Dataset):
-    def __init__(self, sentences, tags, repeated_entities_masks, document2sentences, sentence2position_in_document, tokenizer):
+    def __init__(self, sentences, tags, repeated_entities_masks, document2sentences, sentence2position_in_document,
+                 tokenizer):
         self.sentences = sentences
         self.sentences_tags = tags
         self.repeated_entities_masks = repeated_entities_masks
@@ -70,7 +72,8 @@ class SentencesPlusDocumentsDataset(Dataset):
 
         self.tokenizer = tokenizer
 
-        self.ner_tags = [self.tokenizer.pad_token] + list(set(tag for tag_list in self.sentences_tags for tag in tag_list))
+        self.ner_tags = [self.tokenizer.pad_token] + list(
+            set(tag for tag_list in self.sentences_tags for tag in tag_list))
         self.tag2idx = {tag: idx for idx, tag in enumerate(self.ner_tags)}
         self.idx2tag = {idx: tag for idx, tag in enumerate(self.ner_tags)}
 
@@ -88,14 +91,21 @@ class SentencesPlusDocumentsDataset(Dataset):
         word2tag = dict(zip(words, tags))
 
         tokens = []
+        words_ids = []
         tokenized_tags = []
         tokenized_mask = []
 
-        for word in words:
+        for word_id, word in enumerate(words):
             subtokens = self.tokenizer.tokenize(word)
             for i in range(len(subtokens)):
-                tokenized_tags.append(word2tag[word])
-                tokenized_mask.append(word2mask[word])
+                if i == 0:
+                    tokenized_tags.append(word2tag[word])
+                    tokenized_mask.append(word2mask[word])
+                else:
+                    tokenized_tags.append(-100)
+                    tokenized_mask.append(word2mask[word])
+
+                words_ids.append(word_id)
             tokens.extend(subtokens)
 
         tokens = [self.tokenizer.cls_token] + tokens + [self.tokenizer.sep_token]
@@ -105,17 +115,20 @@ class SentencesPlusDocumentsDataset(Dataset):
         tags_ids = [self.tag2idx[tag] for tag in tokenized_tags]
 
         tokenized_mask = [-1] + tokenized_mask + [-1]
+        attention_mask = [1 for token in tokens_ids]
 
-        return torch.LongTensor(tokens_ids), torch.LongTensor(tags_ids), torch.LongTensor(tokenized_mask), document_id, sentence_id_in_document
+        return torch.LongTensor(tokens_ids), torch.LongTensor(tags_ids), torch.LongTensor(tokenized_mask), \
+               torch.LongTensor(attention_mask), words_ids, document_id, sentence_id_in_document
 
     def paddings(self, batch):
-        tokens, tags, masks, document_ids, sentences_ids = list(zip(*batch))
+        tokens, tags, masks, attention_masks, words_ids, document_ids, sentences_ids = list(zip(*batch))
 
         tokens = pad_sequence(tokens, batch_first=True)
         tags = pad_sequence(tags, batch_first=True)
         masks = pad_sequence(masks, batch_first=True)
+        attention_masks = pad_sequence(attention_masks, batch_first=True)
 
-        return tokens, tags, masks, document_ids, sentences_ids
+        return tokens, tags, masks, attention_masks, words_ids, document_ids, sentences_ids
 
 
 class SentencesDataset(Dataset):
@@ -126,7 +139,8 @@ class SentencesDataset(Dataset):
 
         self.tokenizer = tokenizer
 
-        self.ner_tags = [self.tokenizer.pad_token] + list(set(tag for tag_list in self.sentences_tags for tag in tag_list))
+        self.ner_tags = [self.tokenizer.pad_token] + list(
+            set(tag for tag_list in self.sentences_tags for tag in tag_list))
         self.tag2idx = {tag: idx for idx, tag in enumerate(self.ner_tags)}
         self.idx2tag = {idx: tag for idx, tag in enumerate(self.ner_tags)}
 
