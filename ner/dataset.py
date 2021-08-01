@@ -81,7 +81,7 @@ class SentencesPlusDocumentsDataset(Dataset):
         return len(self.sentences)
 
     def __getitem__(self, item):
-        words = self.sentences[item]
+        words = truecase_sentence(self.sentences[item])
         tags = self.sentences_tags[item]
         mask = self.repeated_entities_masks[item]
         document_id = self.sentence2document[item]
@@ -106,7 +106,7 @@ class SentencesPlusDocumentsDataset(Dataset):
                     tokenized_mask.append(word2mask[word])
 
                 words_ids.append(word_id)
-            tokens.extend(truecase_sentence(subtokens))
+            tokens.extend(subtokens)
 
         tokens = [self.tokenizer.cls_token] + tokens + [self.tokenizer.sep_token]
         tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
