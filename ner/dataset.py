@@ -1,6 +1,7 @@
 import torch
 from torch.utils.data import Dataset
 from torch.nn.utils.rnn import pad_sequence
+from ner.preprocessing import truecase_sentence
 
 
 class CoNLLDataset(Dataset):
@@ -105,7 +106,7 @@ class SentencesPlusDocumentsDataset(Dataset):
                     tokenized_mask.append(word2mask[word])
 
                 words_ids.append(word_id)
-            tokens.extend(subtokens)
+            tokens.extend(truecase_sentence(subtokens))
 
         tokens = [self.tokenizer.cls_token] + tokens + [self.tokenizer.sep_token]
         tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
