@@ -99,7 +99,7 @@ class Trainer():
 
         return loss, iteration_result
 
-    def __get_document_word_vectors(self, document_ids: List[int], documents: Document) -> Sequence[Dict, Dict]:
+    def __get_document_word_vectors(self, document_ids: List[int], documents: Document) -> tuple[dict, dict]:
         for param in self.model.bert.parameters():
             param.requires_grad = False
 
