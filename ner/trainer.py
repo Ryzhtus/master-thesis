@@ -72,7 +72,7 @@ class Trainer():
                 param.requires_grad = False
 
         if document_ids and sentences_ids and mean_embeddings_for_batch_documents and sentences_from_documents:
-            predictions = self.model(input_ids, document_ids, sentences_ids, mean_embeddings_for_batch_documents,
+            predictions = self.model(input_ids, attention_masks, document_ids, sentences_ids, mean_embeddings_for_batch_documents,
                                      sentences_from_documents)
         else:
             predictions = self.model(input_ids, attention_masks)
