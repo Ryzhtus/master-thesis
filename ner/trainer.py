@@ -57,13 +57,13 @@ class Trainer():
         self.eval_loss = []
         self.test_loss = []
 
-        self.test_labels = []
-        self.test_predictions = []
+        self.epoch_labels = []
+        self.epoch_predictions = []
 
-        self.progress_info = '{:>5s} Loss = {:.5f}, F1-score = {:.2%}'
+        self.progress_info = '{:>5s} Loss = {:.5f}, Token F1-score = {:.2%}, Span F1-score = {:.2%}'
 
     def __step(self, input_ids: torch.Tensor, tags: torch.Tensor, attention_masks: torch.Tensor, masks: List[List[int]],
-               test_epoch: bool, document_ids: List[int] = None, sentences_ids: List[int] = None,
+               document_ids: List[int] = None, sentences_ids: List[int] = None,
                mean_embeddings_for_batch_documents: Dict = None, sentences_from_documents: Dict = None,
                freeze_bert: bool = False):
 
@@ -93,9 +93,8 @@ class Trainer():
 
         iteration_result = performance_measure(clear_labels, clear_predictions)
 
-        if test_epoch:
-            self.test_labels += clear_labels
-            self.test_predictions += clear_predictions
+        self.epoch_labels += clear_labels
+        self.epoch_predictions += clear_predictions
 
         return loss, iteration_result
 
@@ -138,11 +137,11 @@ class Trainer():
                         sentences_ids = batch[6]
                         mean_document_word_vectors, sentences_from_documents = self.__get_document_word_vectors(
                             document_ids, self.train_documents)
-                        loss, step_f1 = self.__step(tokens, tags, attention_masks, masks, False, document_ids,
+                        loss, step_f1 = self.__step(tokens, tags, attention_masks, masks, document_ids,
                                                     sentences_ids, mean_document_word_vectors,
                                                     sentences_from_documents, freeze_bert)
                     else:
-                        loss, step_f1 = self.__step(tokens, tags, attention_masks, masks, False, freeze_bert=freeze_bert)
+                        loss, step_f1 = self.__step(tokens, tags, attention_masks, masks, freeze_bert=freeze_bert)
 
                     epoch_metrics + step_f1
                     epoch_loss += loss.item()
@@ -159,11 +158,13 @@ class Trainer():
                     progress_bar.update()
                     progress_bar.set_description(self.progress_info.format(name, loss.item(), 0, 0))
 
-                epoch_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
+                epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
+                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions, scheme=IOB2)
                 progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
-                                                                       epoch_f1_score))
+                                                                       epoch_token_f1_score, epoch_span_f1_score))
 
-                self.experiment.log_metric("Train F1", epoch_f1_score)
+                self.experiment.log_metric("Train Token F1", epoch_token_f1_score)
+                self.experiment.log_metric("Train Span F1", epoch_span_f1_score)
                 self.experiment.log_metric("Train Recall", epoch_recall)
                 self.experiment.log_metric("Train Precision", epoch_precision)
 
@@ -187,11 +188,11 @@ class Trainer():
                         sentences_ids = batch[6]
                         mean_document_word_vectors, sentences_from_documents = self.__get_document_word_vectors(
                             document_ids, self.eval_documents)
-                        loss, step_f1 = self.__step(tokens, tags, attention_masks, masks, False, document_ids,
+                        loss, step_f1 = self.__step(tokens, tags, attention_masks, masks, document_ids,
                                                     sentences_ids, mean_document_word_vectors,
                                                     sentences_from_documents)
                     else:
-                        loss, step_f1 = self.__step(tokens, tags, attention_masks, masks, False)
+                        loss, step_f1 = self.__step(tokens, tags, attention_masks, masks)
 
                     epoch_metrics + step_f1
                     epoch_loss += loss.item()
@@ -199,11 +200,13 @@ class Trainer():
                     progress_bar.update()
                     progress_bar.set_description(self.progress_info.format(name, loss.item(), 0, 0))
 
-                epoch_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
-                progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.eval_data),
-                                                                       epoch_f1_score))
+                epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
+                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions, scheme=IOB2)
+                progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
+                                                                       epoch_token_f1_score, epoch_span_f1_score))
 
-                self.experiment.log_metric("Validation F1", epoch_f1_score)
+                self.experiment.log_metric("Validation Token F1", epoch_token_f1_score)
+                self.experiment.log_metric("Validation Span F1", epoch_span_f1_score)
                 self.experiment.log_metric("Validation Recall", epoch_recall)
                 self.experiment.log_metric("Validation Precision", epoch_precision)
 
@@ -227,11 +230,11 @@ class Trainer():
                         sentences_ids = batch[6]
                         mean_document_word_vectors, sentences_from_documents = self.__get_document_word_vectors(
                             document_ids, self.test_documents)
-                        loss, step_f1 = self.__step(tokens, tags, attention_masks, masks, True, document_ids,
+                        loss, step_f1 = self.__step(tokens, tags, attention_masks, masks, document_ids,
                                                     sentences_ids, mean_document_word_vectors,
                                                     sentences_from_documents)
                     else:
-                        loss, step_f1 = self.__step(tokens, tags, attention_masks, masks, True)
+                        loss, step_f1 = self.__step(tokens, tags, attention_masks, masks)
 
                     epoch_metrics + step_f1
                     epoch_loss += loss.item()
@@ -239,11 +242,13 @@ class Trainer():
                     progress_bar.update()
                     progress_bar.set_description(self.progress_info.format(name, loss.item(), 0, 0))
 
-                epoch_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
-                progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.test_data),
-                                                                       epoch_f1_score))
+                epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
+                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions, scheme=IOB2)
+                progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
+                                                                       epoch_token_f1_score, epoch_span_f1_score))
 
-                self.experiment.log_metric("Test F1", epoch_f1_score)
+                self.experiment.log_metric("Test Token F1", epoch_token_f1_score)
+                self.experiment.log_metric("Test Span F1", epoch_span_f1_score)
                 self.experiment.log_metric("Test Recall", epoch_recall)
                 self.experiment.log_metric("Test Precision", epoch_precision)
 
@@ -261,12 +266,18 @@ class Trainer():
             else:
                 self.__train_epoch(progress + 'Train:')
 
+            # clear labels and predictions from memory after training epoch
+            self.epoch_labels = []
+            self.epoch_predictions = []
+
             self.__eval_epoch(progress + 'Eval :')
+
+            # clear labels and predictions from memory after validation epoch
+            self.epoch_labels = []
+            self.epoch_predictions = []
 
     def test(self):
         self.__test_epoch('Test :')
 
-        print('Brute F1-score: {}'.format(f1_score(self.test_labels, self.test_predictions, mode='strict', scheme=IOB2)))
-
         print('Classification Report')
-        print(classification_report(self.test_labels, self.test_predictions, mode='strict', scheme=IOB2))
+        print(classification_report(self.epoch_labels, self.epoch_predictions, scheme=IOB2, digits=4))
