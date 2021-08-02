@@ -178,7 +178,7 @@ class DocumentContextBertBaseNER(nn.Module):
 
     def forward(self, batch, attention_masks, documents_ids, sentences_ids, mean_embeddings_for_batch_documents,
                 sentences_from_documents):
-        last_hidden_state = self.bert(input_ids=batch, attention_masks=attention_masks)[0]
+        last_hidden_state = self.bert(input_ids=batch, attention_mask=attention_masks)[0]
         additional_context = last_hidden_state.clone().detach()
         additional_context.requires_grad_(requires_grad=False)
 
@@ -277,7 +277,7 @@ class DocumentContextBertLargeNER(nn.Module):
 
     def forward(self, batch, attention_masks, documents_ids, sentences_ids, mean_embeddings_for_batch_documents,
                 sentences_from_documents):
-        last_hidden_state = self.bert(input_ids=batch, attention_masks=attention_masks)[0]
+        last_hidden_state = self.bert(input_ids=batch, attention_mask=attention_masks)[0]
         additional_context = last_hidden_state.clone().detach()
         additional_context.requires_grad_(requires_grad=False)
         
