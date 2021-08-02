@@ -81,7 +81,7 @@ class SentencesPlusDocumentsDataset(Dataset):
         return len(self.sentences)
 
     def __getitem__(self, item):
-        words = truecase_sentence(self.sentences[item])
+        words = self.sentences[item]
         tags = self.sentences_tags[item]
         mask = self.repeated_entities_masks[item]
         document_id = self.sentence2document[item]
