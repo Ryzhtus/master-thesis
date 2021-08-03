@@ -5,7 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/ner/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/model.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ner/preprocessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/preprocessing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ner/reader.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/reader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scores/score_bert_base_linear.py" beforeDir="false" afterPath="$PROJECT_DIR$/scores/score_bert_base_linear.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,8 +60,8 @@
       <recent name="C:\Users\shkun\Documents\Учеба\МФТИ\Диссертация\ner-with-nonlocal-features\data\ontonotes\v1" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.score_bert_base_linear">
-    <configuration name="bpe_test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python.run">
+    <configuration name="preprocessing" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ner-with-nonlocal-features" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -65,12 +69,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ner" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/bpe_test.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ner/preprocessing.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -101,7 +105,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="reader_test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="run" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ner-with-nonlocal-features" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -114,7 +118,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/reader_test.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/run.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -123,7 +127,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="results_conll_full_document_context" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="run_conll" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ner-with-nonlocal-features" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -131,12 +135,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/notebooks" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/notebooks/results_conll_full_document_context.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/run_conll.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -168,19 +172,19 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.bpe_test" />
-      <item itemvalue="Python.results_conll_full_document_context" />
-      <item itemvalue="Python.reader_test" />
       <item itemvalue="Python.reader_ontonotes_test" />
       <item itemvalue="Python.score_bert_base_linear" />
+      <item itemvalue="Python.run_conll" />
+      <item itemvalue="Python.run" />
+      <item itemvalue="Python.preprocessing" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.run" />
+        <item itemvalue="Python.preprocessing" />
         <item itemvalue="Python.score_bert_base_linear" />
+        <item itemvalue="Python.run_conll" />
         <item itemvalue="Python.reader_ontonotes_test" />
-        <item itemvalue="Python.reader_test" />
-        <item itemvalue="Python.results_conll_full_document_context" />
-        <item itemvalue="Python.bpe_test" />
       </list>
     </recent_temporary>
   </component>
@@ -299,7 +303,7 @@
       <workItem from="1627726312963" duration="1656000" />
       <workItem from="1627837730788" duration="1695000" />
       <workItem from="1627893891391" duration="3338000" />
-      <workItem from="1627909650393" duration="4782000" />
+      <workItem from="1627909650393" duration="12654000" />
     </task>
     <servers />
   </component>
@@ -328,20 +332,22 @@
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$results_ontonotes.coverage" NAME="results_ontonotes Coverage Results" MODIFIED="1619951356523" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/notebooks" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$ontonotes_to_conll.coverage" NAME="ontonotes_to_conll Coverage Results" MODIFIED="1613137829685" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$ontonotes_reader.coverage" NAME="ontonotes_reader Coverage Results" MODIFIED="1613476311845" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ontonotes" />
-    <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$score.coverage" NAME="score Coverage Results" MODIFIED="1627912114114" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$score.coverage" NAME="score_bert_base_linear Coverage Results" MODIFIED="1627989508746" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$repeated_entities_statistics__1_.coverage" NAME="repeated_entities_statistics (1) Coverage Results" MODIFIED="1612969583503" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$reader.coverage" NAME="reader Coverage Results" MODIFIED="1615197581873" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/named_entity_recognition" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$pytest_in_test_document_iterator_py.coverage" NAME="pytest in test_document_iterator.py Coverage Results" MODIFIED="1619697023495" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$pytest_for_test_repeated_entities_RepeatedEntitiesTest_test_lengths_after_processing.coverage" NAME="pytest for test_repeated_entities.RepeatedEntitiesTest.test_lengths_after_processing Coverage Results" MODIFIED="1612973712236" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$pytest_in_test_reader_document_py.coverage" NAME="pytest in test_reader_document.py Coverage Results" MODIFIED="1621884690652" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/named_entity_recognition" />
+    <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$preprocessing.coverage" NAME="preprocessing Coverage Results" MODIFIED="1627989845561" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ner" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$pytest_for_test_iterator_DocumentIteratorTest_test_batches.coverage" NAME="pytest for test_iterator.DocumentIteratorTest.test_batches Coverage Results" MODIFIED="1619693382191" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$dataset.coverage" NAME="dataset Coverage Results" MODIFIED="1621887121943" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/named_entity_recognition" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$repeated_entities_statistics_ontonotes.coverage" NAME="repeated_entities_statistics_ontonotes Coverage Results" MODIFIED="1622452969008" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$repeated_entities_statistics.coverage" NAME="repeated_entities_statistics Coverage Results" MODIFIED="1613046615032" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$subcorpus_maker.coverage" NAME="subcorpus_maker Coverage Results" MODIFIED="1612875924180" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$pytest_for_test_repeated_entities_MyTestCase.coverage" NAME="pytest for test_repeated_entities.MyTestCase Coverage Results" MODIFIED="1612970576768" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
-    <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$run.coverage" NAME="run Coverage Results" MODIFIED="1612985863067" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/named_entity_recognition" />
+    <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$run_conll.coverage" NAME="run_conll Coverage Results" MODIFIED="1627928420908" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$results.coverage" NAME="results Coverage Results" MODIFIED="1619796011604" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/notebooks" />
+    <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$run.coverage" NAME="run Coverage Results" MODIFIED="1627989850183" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$reader_ontonotes_test.coverage" NAME="reader_ontonotes_test Coverage Results" MODIFIED="1625736500561" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$pytest_in_test_repeated_entities_py.coverage" NAME="pytest in test_repeated_entities.py Coverage Results" MODIFIED="1612987910612" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/ner_with_nonlocal_features$ontonotes_to_conll__1_.coverage" NAME="ontonotes_to_conll (1) Coverage Results" MODIFIED="1613137897656" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ontonotes" />

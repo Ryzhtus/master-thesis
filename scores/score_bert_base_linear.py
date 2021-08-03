@@ -1,4 +1,8 @@
+import nltk
+
+nltk.download('punkt')
 import numpy as np
+
 params = {
     'model': 'Bert-Base-Cased',
     'corpus': 'CoNLL2003',

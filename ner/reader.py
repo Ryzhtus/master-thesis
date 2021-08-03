@@ -1,6 +1,7 @@
 import collections
 import os
 
+from ner.preprocessing import truecase_sentence
 
 class ReaderCoNLL():
     def __init__(self, include_document_ids=False):
@@ -13,7 +14,7 @@ class ReaderCoNLL():
         for sentence in rows:
             words = [line.split()[0] for line in sentence.splitlines()]
             tags = [line.split()[-1] for line in sentence.splitlines()]
-            sentences.append(words)
+            sentences.append(truecase_sentence(words))
             sentences_tags.append(tags)
 
         return sentences, sentences_tags

@@ -4,7 +4,6 @@ from typing import List
 import truecase
 import re
 
-
 def truecase_sentence(tokens: List[str]) -> List[str]:
     word_list = [(w, idx) for idx, w in enumerate(tokens) if all(c.isalpha() for c in w)]
     lst = [w for w, _ in word_list if re.match(r'\b[A-Z\.\-]+\b', w)]
