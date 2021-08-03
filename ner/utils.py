@@ -1,21 +1,28 @@
 from ner.reader import ReaderCoNLL, ReaderOntonotes
-from ner.dataset import CoNLLDataset, SentencesDataset, SentencesPlusDocumentsDataset
+from ner.dataset import CoNLLDatasetBERT, CoNLLDatasetT5, SentencesDataset, SentencesPlusDocumentsDataset
 from ner.iterator import DocumentBatchIterator
 from ner.document import Document
 from torch.utils.data import DataLoader
 
 
-def create_dataset_and_standard_dataloader(dataset_name: str, filename: str, batch_size: int, shuffle: bool, tokenizer):
+def create_dataset_and_standard_dataloader(model_name: str, dataset_name: str, filename: str, batch_size: int,
+                                           shuffle: bool, tokenizer):
     if dataset_name == 'conll':
         reader = ReaderCoNLL()
         sentences, tags, masks = reader.read(filename)
-        dataset = CoNLLDataset(sentences, tags, masks, tokenizer)
+        if model_name == 'BERT':
+            dataset = CoNLLDatasetBERT(sentences, tags, masks, tokenizer)
+        elif model_name == 'T5':
+            dataset = CoNLLDatasetT5(sentences, tags, masks, tokenizer)
+        else:
+            raise ValueError('The model {} name is not valid or this model is not supported.'.format(model_name))
+
         return dataset, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
     if dataset_name == 'ontonotes':
         reader = ReaderOntonotes()
         sentences, tags, masks = reader.read(filename)
-        dataset = CoNLLDataset(sentences, tags, masks, tokenizer)
+        dataset = CoNLLDatasetBERT(sentences, tags, masks, tokenizer)
         return dataset, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
 

@@ -1,20 +1,70 @@
-from transformers import BertModel
+from transformers import BertModel, T5EncoderModel
 import torch.nn as nn
 import torch
 
 
-class BertNER(nn.Module):
-    def __init__(self, num_classes):
-        super(BertNER, self).__init__()
-        self.embedding_dim = 768
-        self.num_classes = num_classes
+class BERT(nn.Module):
+    def __init__(self, model_name: str, classes: int, dropout_value: float = 0.1,
+                 use_lstm: bool = False, lstm_layers: int = 1, lstm_size: int = 256):
+        super(BERT, self).__init__()
+        self.model_name = model_name
 
-        self.bert = BertModel.from_pretrained("bert-base-cased")
-        self.linear = nn.Linear(self.embedding_dim, self.num_classes)
+        if self.model_name == 'bert-base-cased':
+            self.embedding_dim = 768
+        elif self.model_name == 'bert-large-cased':
+            self.embedding_dim = 1024
+        else:
+            raise ValueError('Model name is not specified.')
+
+        self.classes = classes
+        self.dropout_value = dropout_value
+        self.use_lstm = use_lstm
+        self.lstm_layers = lstm_layers
+        self.lstm_hidden_size = lstm_size
+
+        self.bert = BertModel.from_pretrained(self.model_name, output_hidden_states=True)
+        self.lstm = nn.LSTM(self.embedding_dim * 2, self.lstm_hidden_size,
+                            bidirectional=True, num_layers=self.lstm_layers)
+        self.linear = nn.Linear(self.embedding_dim * 2, self.classes)
+        self.linear_lstm = nn.Linear(self.lstm_hidden_size * 2, self.classes)
+        self.dropout = nn.Dropout(self.dropout_value)
 
     def forward(self, input_ids, attention_mask=None):
-        embeddings = self.bert(input_ids=input_ids, attention_mask=attention_mask)[0]
-        predictions = self.linear(embeddings)
+        last_hidden_state = self.bert(input_ids=input_ids, attention_mask=attention_mask)[0]
+
+        if self.use_lstm:
+            predictions = self.lstm(last_hidden_state)[0]
+            predictions = self.dropout(predictions)
+            predictions = self.linear_lstm(predictions)
+        else:
+            predictions = self.dropout(last_hidden_state)
+            predictions = self.linear(predictions)
+
+        return predictions
+
+
+class T5ModelNER(nn.Module):
+    def __init__(self, model_name: str, classes: int):
+        super(T5ModelNER, self).__init__()
+
+        self.model_name = model_name
+        if self.model_name == 't5-small':
+            self.embedding_dim = 512
+        elif self.model_name == 't5-base':
+            self.embedding_dim = 768
+        elif self.model_name == 't5-large':
+            self.embedding_dim = 1024
+        else:
+            raise ValueError('Model name is not specified.')
+
+        self.classes = classes
+
+        self.t5 = T5EncoderModel.from_pretrained(model_name, output_attentions=True)
+        self.linear = nn.Linear(self.embedding_dim, self.classes)
+
+    def forward(self, input_ids, attention_masks=None):
+        last_hidden_state = self.t5(input_ids=input_ids, attention_mask=attention_masks)[0]
+        predictions = self.linear(last_hidden_state)
 
         return predictions
 
@@ -142,8 +192,8 @@ class DocumentBPEContextBertNER(nn.Module):
 
 
 class DocumentContextBERT(nn.Module):
-    def __init__(self, model_name: str, classes: int, dropout_value: float = 0.1, allow_flow_grad: bool = False, use_lstm: bool = False,
-                 lstm_layers: int = 1, lstm_size: int = 256, device=torch.device('cpu')):
+    def __init__(self, model_name: str, classes: int, dropout_value: float = 0.1, allow_flow_grad: bool = False,
+                 use_lstm: bool = False, lstm_layers: int = 1, lstm_size: int = 256, device=torch.device('cpu')):
         super(DocumentContextBERT, self).__init__()
         self.model_name = model_name
 
