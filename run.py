@@ -11,5 +11,4 @@ eval_dataset, eval_documents, eval_dataloader = create_dataset_and_document_data
 test_dataset, test_documents, test_dataloader = create_dataset_and_document_dataloader('conll', 'data/conll2003/test.txt', batch_size=BATCH_SIZE, shuffle=False, tokenizer=TOKENIZER)
 """
 
-MODEL = BERT('bert-base-cased', 9)
-print(MODEL)
+print(train_dataset[0])

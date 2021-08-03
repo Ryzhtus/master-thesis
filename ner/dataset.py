@@ -75,8 +75,7 @@ class CoNLLDatasetT5(Dataset):
 
         self.tokenizer = tokenizer
 
-        self.ner_tags = [self.tokenizer.pad_token] + list(
-            set(tag for tag_list in self.sentences_tags for tag in tag_list))
+        self.ner_tags = list(set(tag for tag_list in self.sentences_tags for tag in tag_list))
         self.tag2idx = {tag: idx for idx, tag in enumerate(self.ner_tags)}
         self.idx2tag = {idx: tag for idx, tag in enumerate(self.ner_tags)}
 
@@ -109,7 +108,7 @@ class CoNLLDatasetT5(Dataset):
                 words_ids.append(word_id)
             tokens.extend(subtokens)
 
-        tokens = [self.tokenizer.cls_token] + tokens + [self.tokenizer.sep_token]
+        tokens = tokens + [self.tokenizer.eos_token]
         tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
 
         tags_ids = [self.tag2idx[tag] if tag != -100 else tag for tag in tokenized_tags] + [-100]
