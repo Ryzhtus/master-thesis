@@ -4,6 +4,9 @@ Here we present results of our baselines and advanced models.
 
 ## CoNLL
 ### Baseline
+Date: 02.08.2021
+What: Base BERT with only Linear layer for baseline results on pure CoNLL Dateset.
+
 <details>
   <summary>Model and Hyperparameters</summary>
 

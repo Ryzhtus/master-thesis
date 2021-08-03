@@ -141,18 +141,34 @@ class DocumentBPEContextBertNER(nn.Module):
         return predictions
 
 
-class DocumentContextBertBaseNER(nn.Module):
-    def __init__(self, classes: int, use_lstm: bool, device):
-        super(DocumentContextBertBaseNER, self).__init__()
-        self.embedding_dim = 768
+class DocumentContextBERT(nn.Module):
+    def __init__(self, model_name: str, classes: int, dropout_value: float = 0.1, allow_flow_grad: bool = False, use_lstm: bool = False,
+                 lstm_layers: int = 1, lstm_size: int = 256, device=torch.device('cpu')):
+        super(DocumentContextBERT, self).__init__()
+        self.model_name = model_name
+
+        if self.model_name == 'bert-base-cased':
+            self.embedding_dim = 768
+        elif self.model_name == 'bert-large-cased':
+            self.embedding_dim = 1024
+        else:
+            raise ValueError('Model name is not specified.')
+
         self.classes = classes
+        self.dropout_value = dropout_value
+        self.allow_flow_grad = allow_flow_grad
+
         self.use_lstm = use_lstm
         self.device = device
+        self.lstm_hidden_size = lstm_size
+        self.lstm_layers = lstm_layers
 
-        self.bert = BertModel.from_pretrained("bert-base-cased", output_hidden_states=True)
-        self.lstm = nn.LSTM(self.embedding_dim * 2, self.embedding_dim, bidirectional=True)
+        self.bert = BertModel.from_pretrained(self.model_name, output_hidden_states=True)
+        self.lstm = nn.LSTM(self.embedding_dim * 2, self.lstm_hidden_size,
+                            bidirectional=True, num_layers=self.lstm_layers)
         self.linear = nn.Linear(self.embedding_dim * 2, self.classes)
-        self.dropout = nn.Dropout(0.1)
+        self.linear_lstm = nn.Linear(self.lstm_hidden_size * 2, self.classes)
+        self.dropout = nn.Dropout(self.dropout_value)
 
     def get_document_context(self, document, words):
         last_hidden_state = self.bert(document)[0]
@@ -179,8 +195,11 @@ class DocumentContextBertBaseNER(nn.Module):
     def forward(self, batch, attention_masks, documents_ids, sentences_ids, mean_embeddings_for_batch_documents,
                 sentences_from_documents):
         last_hidden_state = self.bert(input_ids=batch, attention_mask=attention_masks)[0]
-        additional_context = last_hidden_state.clone().detach()
-        additional_context.requires_grad_(requires_grad=False)
+        if self.allow_flow_grad:
+            additional_context = last_hidden_state.clone()
+        else:
+            additional_context = last_hidden_state.clone().detach()
+            additional_context.requires_grad_(requires_grad=False)
 
         for batch_element_id, tokens in enumerate(batch):
             document_id = documents_ids[batch_element_id]
@@ -232,7 +251,7 @@ class DocumentContextBertBaseNER(nn.Module):
         if self.use_lstm:
             predictions = self.lstm(hidden_state_with_context)[0]
             predictions = self.dropout(predictions)
-            predictions = self.linear(predictions)
+            predictions = self.linear_lstm(predictions)
         else:
             predictions = self.dropout(hidden_state_with_context)
             predictions = self.linear(predictions)
