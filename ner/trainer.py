@@ -64,16 +64,16 @@ class Trainer():
 
     def __step(self, input_ids: torch.Tensor, labels: torch.Tensor, attention_mask: torch.Tensor, masks: List[List[int]],
                document_ids: List[int] = None, sentences_ids: List[int] = None,
-               mean_embeddings_for_batch_documents: Dict = None, sentences_from_documents: Dict = None,
+               document_word_embeddings: Dict = None, word_positions: Dict = None,
                freeze_bert: bool = False):
 
         if freeze_bert:
             for param in self.model.bert.parameters():
                 param.requires_grad = False
 
-        if document_ids and sentences_ids and mean_embeddings_for_batch_documents and sentences_from_documents:
-            predictions = self.model(input_ids, attention_mask, document_ids, sentences_ids, mean_embeddings_for_batch_documents,
-                                     sentences_from_documents)
+        if document_ids and sentences_ids and document_word_embeddings and word_positions:
+            predictions = self.model(input_ids, attention_mask, document_ids, sentences_ids, document_word_embeddings,
+                                     word_positions)
         else:
             predictions = self.model(input_ids, attention_mask)
 
@@ -107,22 +107,21 @@ class Trainer():
         for param in self.model.bert.parameters():
             param.requires_grad = False
 
-        documents_set = set(document_ids)
+        document_word_embeddings = {}
+        # variable for each word's positions in each document in sentence order
+        word_positions = {}
 
-        mean_embeddings_for_batch_documents = {}
-        sentences_from_documents = {}
-
-        for document_id in documents_set:
-            mean_embeddings_for_batch_documents[document_id] = self.model.get_document_context(
+        for document_id in set(document_ids):
+            document_word_embeddings[document_id] = self.model.get_document_context(
                 documents[document_id].to(self.device),
                 documents.collect_all_positions_for_each_word(document_id))
-            sentences_from_documents[document_id] = documents.get_document_words_by_sentences(
+            word_positions[document_id] = documents.get_document_words_by_sentences(
                 document_id)
 
         for param in self.model.bert.parameters():
             param.requires_grad = True
 
-        return mean_embeddings_for_batch_documents, sentences_from_documents
+        return document_word_embeddings, word_positions
 
     def __train_epoch(self, name: str, freeze_bert=False):
         epoch_loss = 0
@@ -140,11 +139,11 @@ class Trainer():
                     if self.train_documents:
                         document_ids = batch[5]
                         sentences_ids = batch[6]
-                        mean_document_word_vectors, sentences_from_documents = self.__get_document_word_vectors(
+                        document_word_embeddings, word_positions = self.__get_document_word_vectors(
                             document_ids, self.train_documents)
                         loss, step_f1 = self.__step(tokens, tags, attention_mask, masks, document_ids,
-                                                    sentences_ids, mean_document_word_vectors,
-                                                    sentences_from_documents, freeze_bert)
+                                                    sentences_ids, document_word_embeddings,
+                                                    word_positions, freeze_bert)
                     else:
                         loss, step_f1 = self.__step(tokens, tags, attention_mask, masks, freeze_bert=freeze_bert)
 
@@ -164,7 +163,7 @@ class Trainer():
                     progress_bar.set_description(self.progress_info.format(name, loss.item(), 0, 0))
 
                 epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
-                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions, scheme=IOB2)
+                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions)
                 progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
                                                                        epoch_token_f1_score, epoch_span_f1_score))
 
@@ -191,11 +190,11 @@ class Trainer():
                     if self.eval_documents:
                         document_ids = batch[5]
                         sentences_ids = batch[6]
-                        mean_document_word_vectors, sentences_from_documents = self.__get_document_word_vectors(
+                        document_word_embeddings, word_positions = self.__get_document_word_vectors(
                             document_ids, self.eval_documents)
                         loss, step_f1 = self.__step(tokens, tags, attention_mask, masks, document_ids,
-                                                    sentences_ids, mean_document_word_vectors,
-                                                    sentences_from_documents)
+                                                    sentences_ids, document_word_embeddings,
+                                                    word_positions)
                     else:
                         loss, step_f1 = self.__step(tokens, tags, attention_mask, masks)
 
@@ -206,7 +205,7 @@ class Trainer():
                     progress_bar.set_description(self.progress_info.format(name, loss.item(), 0, 0))
 
                 epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
-                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions, scheme=IOB2)
+                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions)
                 progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
                                                                        epoch_token_f1_score, epoch_span_f1_score))
 
@@ -233,11 +232,11 @@ class Trainer():
                     if self.test_documents:
                         document_ids = batch[5]
                         sentences_ids = batch[6]
-                        mean_document_word_vectors, sentences_from_documents = self.__get_document_word_vectors(
+                        document_word_embeddings, word_positions = self.__get_document_word_vectors(
                             document_ids, self.test_documents)
                         loss, step_f1 = self.__step(tokens, tags, attention_mask, masks, document_ids,
-                                                    sentences_ids, mean_document_word_vectors,
-                                                    sentences_from_documents)
+                                                    sentences_ids, document_word_embeddings,
+                                                    word_positions)
                     else:
                         loss, step_f1 = self.__step(tokens, tags, attention_mask, masks)
 
@@ -248,7 +247,7 @@ class Trainer():
                     progress_bar.set_description(self.progress_info.format(name, loss.item(), 0, 0))
 
                 epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
-                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions, scheme=IOB2)
+                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions)
                 progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
                                                                        epoch_token_f1_score, epoch_span_f1_score))
 

@@ -14,7 +14,7 @@ class BERT(nn.Module):
         elif self.model_name == 'bert-large-cased':
             self.embedding_dim = 1024
         else:
-            raise ValueError('Model name is not specified.')
+            raise ValueError('Model name is not valid.')
 
         self.classes = classes
         self.dropout_value = dropout_value
@@ -43,9 +43,9 @@ class BERT(nn.Module):
         return predictions
 
 
-class T5ModelNER(nn.Module):
+class T5(nn.Module):
     def __init__(self, model_name: str, classes: int):
-        super(T5ModelNER, self).__init__()
+        super(T5, self).__init__()
 
         self.model_name = model_name
         if self.model_name == 't5-small':
@@ -55,7 +55,7 @@ class T5ModelNER(nn.Module):
         elif self.model_name == 't5-large':
             self.embedding_dim = 1024
         else:
-            raise ValueError('Model name is not specified.')
+            raise ValueError('Model name is not valid..')
 
         self.classes = classes
 
@@ -65,26 +65,6 @@ class T5ModelNER(nn.Module):
     def forward(self, input_ids, attention_masks=None):
         last_hidden_state = self.t5(input_ids=input_ids, attention_mask=attention_masks)[0]
         predictions = self.linear(last_hidden_state)
-
-        return predictions
-
-
-class BertNERBiLSTM(nn.Module):
-    def __init__(self, num_classes):
-        super(BertNERBiLSTM, self).__init__()
-        self.embedding_dim = 768
-        self.num_classes = num_classes
-
-        self.bert = BertModel.from_pretrained("bert-base-cased")
-        self.lstm = nn.LSTM(self.embedding_dim, self.embedding_dim, bidirectional=True)
-        self.linear = nn.Linear(self.embedding_dim * 2, self.num_classes)
-        self.dropout = nn.Dropout(0.1)
-
-    def forward(self, input_ids, attention_mask=None):
-        embeddings = self.bert(input_ids=input_ids, attention_mask=attention_mask)[0]
-        predictions = self.lstm(embeddings)[0]
-        predictions = self.dropout(predictions)
-        predictions = self.linear(predictions)
 
         return predictions
 
@@ -105,7 +85,6 @@ class BatchBPEContextBertNER(nn.Module):
         last_hidden_state = self.bert(batch)[0]
 
         result_hidden_state = last_hidden_state.clone()
-
         additional_context = torch.zeros_like(result_hidden_state, requires_grad=False)
 
         token2embedding = {}
@@ -305,198 +284,5 @@ class DocumentContextBERT(nn.Module):
         else:
             predictions = self.dropout(hidden_state_with_context)
             predictions = self.linear(predictions)
-
-        return predictions
-
-
-class DocumentContextBertLargeNER(nn.Module):
-    def __init__(self, num_classes, use_lstm, device):
-        super(DocumentContextBertLargeNER, self).__init__()
-        self.embedding_dim = 1024
-        self.num_classes = num_classes
-        self.use_lstm = use_lstm
-        self.device = device
-
-        self.bert = BertModel.from_pretrained("bert-large-cased", output_hidden_states=True)
-        self.lstm = nn.LSTM(self.embedding_dim * 2, self.embedding_dim, bidirectional=True)
-        self.linear = nn.Linear(self.embedding_dim * 2, self.num_classes)
-        self.dropout = nn.Dropout(0.1)
-
-    def get_document_context(self, document, words):
-        last_hidden_state = self.bert(document)[0]
-
-        for key in words:
-            current_word = []
-            for pos in words[key]['pos']:
-                sentence_id = pos['sentence_id']
-                if len(pos['ids']) == 1:
-                    position = pos['ids']
-                    current_word.append(last_hidden_state[sentence_id][position])
-                else:
-                    position_start = pos['ids'][0]
-                    position_end = pos['ids'][-1]
-                    current_word.append(last_hidden_state[sentence_id][position_start: position_end + 1])
-
-            all_context_vectors_of_a_word = torch.stack(current_word, dim=0)
-            mean_context_vector_of_a_word = torch.mean(all_context_vectors_of_a_word, dim=0)
-
-            words[key]['context_vector'] = mean_context_vector_of_a_word
-
-        return words
-
-    def forward(self, batch, attention_masks, documents_ids, sentences_ids, mean_embeddings_for_batch_documents,
-                sentences_from_documents):
-        last_hidden_state = self.bert(input_ids=batch, attention_mask=attention_masks)[0]
-        additional_context = last_hidden_state.clone().detach()
-        additional_context.requires_grad_(requires_grad=False)
-        
-        for batch_element_id, tokens in enumerate(batch):
-            document_id = documents_ids[batch_element_id]
-            sentence_id = sentences_ids[batch_element_id]
-
-            words_from_sentences = sentences_from_documents[document_id][sentence_id]
-            words_from_document = mean_embeddings_for_batch_documents[document_id]
-
-            for word in words_from_sentences:
-                word_bpe = words_from_sentences[word]['bpe']
-
-                once_seen = False
-                for key in words_from_document:
-                    if words_from_document[key]['bpe'] == word_bpe:
-                        if len(words_from_document[key]['pos']) == 1:
-                            once_seen = True
-                        else:
-                            context_vector = words_from_document[key]['context_vector']
-                        break
-
-                if once_seen == True:
-                    pass
-                else:
-                    word_positions = words_from_sentences[word]['positions']
-
-                    if word_bpe != '[PAD]':
-                        if len(word_positions) == 1:
-                            position = word_positions[0]
-                            additional_context[batch_element_id][position] = context_vector
-                        else:
-                            for bpe_token_relative_pos, position_in_sentence in enumerate(word_positions):
-                                additional_context[batch_element_id][position_in_sentence] = context_vector[
-                                    bpe_token_relative_pos]
-                    else:
-                        for idx in range(word_positions[0], len(tokens)):
-                            additional_context[batch_element_id][idx] = context_vector
-
-                        for key in words_from_document:
-                            if words_from_document[key]['bpe'] == ['[SEP]']:
-                                context_vector = words_from_document[key]['context_vector']
-                                additional_context[batch_element_id][-1] = context_vector
-                                break
-
-                    break
-
-        additional_context = additional_context.to(self.device)
-        hidden_state_with_context = torch.cat((last_hidden_state, additional_context), 2)
-
-        if self.use_lstm:
-            predictions = self.lstm(hidden_state_with_context)[0]
-            predictions = self.dropout(predictions)
-            predictions = self.linear(predictions)
-        else:
-            predictions = self.dropout(hidden_state_with_context)
-            predictions = self.linear(predictions)
-
-        return predictions
-
-
-class DocumentContextBertBaseLastFourLayersNER(nn.Module):
-    def __init__(self, num_classes, device):
-        super(DocumentContextBertBaseLastFourLayersNER, self).__init__()
-        self.embedding_dim = 768
-        self.num_classes = num_classes
-        self.device = device
-
-        self.bert = BertModel.from_pretrained("bert-base-cased", output_hidden_states=True)
-        self.lstm = nn.LSTM(self.embedding_dim * 2, self.embedding_dim, bidirectional=True)
-        self.linear = nn.Linear(self.embedding_dim * 2, self.num_classes)
-        self.dropout = nn.Dropout(0.1)
-
-    def get_document_context(self, document, words):
-        hidden_states = self.bert(document).hidden_states
-
-        for layer_num in range(9, 13):
-            for key in words:
-                current_word = []
-                for pos in words[key]['pos']:
-                    sentence_id = pos['sentence_id']
-                    if len(pos['ids']) == 1:
-                        position = pos['ids']
-                        current_word.append(hidden_states[layer_num][sentence_id][position])
-                    else:
-                        position_start = pos['ids'][0]
-                        position_end = pos['ids'][-1]
-                        current_word.append(hidden_states[layer_num][sentence_id][position_start: position_end + 1])
-
-                all_context_vectors_of_a_word = torch.stack(current_word, dim=0)
-                mean_context_vector_of_a_word = torch.mean(all_context_vectors_of_a_word, dim=0)
-
-                words[key][layer_num]['context_vector'] = mean_context_vector_of_a_word
-
-        return words
-
-    def forward(self, batch, attention_masks, documents_ids, sentences_ids, mean_embeddings_for_batch_documents,
-                sentences_from_documents):
-        last_hidden_state = self.bert(input_ids=batch, attention_masks=attention_masks)[0]
-        additional_context = last_hidden_state.clone()
-
-        for batch_element_id, tokens in enumerate(batch):
-            document_id = documents_ids[batch_element_id]
-            sentence_id = sentences_ids[batch_element_id]
-
-            words_from_sentences = sentences_from_documents[document_id][sentence_id]
-            words_from_document = mean_embeddings_for_batch_documents[document_id]
-
-            for word in words_from_sentences:
-                word_bpe = words_from_sentences[word]['bpe']
-
-                once_seen = False
-                for key in words_from_document:
-                    if words_from_document[key]['bpe'] == word_bpe:
-                        if len(words_from_document[key]['pos']) == 1:
-                            once_seen = True
-                        else:
-                            context_vector = words_from_document[key]['context_vector']
-                        break
-
-                if once_seen == True:
-                    pass
-                else:
-                    word_positions = words_from_sentences[word]['positions']
-
-                    if word_bpe != '[PAD]':
-                        if len(word_positions) == 1:
-                            position = word_positions[0]
-                            additional_context[batch_element_id][position] = context_vector
-                        else:
-                            for bpe_token_relative_pos, position_in_sentence in enumerate(word_positions):
-                                additional_context[batch_element_id][position_in_sentence] = context_vector[
-                                    bpe_token_relative_pos]
-                    else:
-                        for idx in range(word_positions[0], len(tokens)):
-                            additional_context[batch_element_id][idx] = context_vector
-
-                        for key in words_from_document:
-                            if words_from_document[key]['bpe'] == ['[SEP]']:
-                                context_vector = words_from_document[key]['context_vector']
-                                additional_context[batch_element_id][-1] = context_vector
-                                break
-
-                    break
-
-        additional_context = additional_context.to(self.device)
-        hidden_state_with_context = torch.cat((last_hidden_state, additional_context), 2)
-
-        predictions = self.lstm(hidden_state_with_context)[0]
-        predictions = self.dropout(predictions)
-        predictions = self.linear(predictions)
 
         return predictions
