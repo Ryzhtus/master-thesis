@@ -2,7 +2,7 @@ import comet_ml
 
 from typing import List, Dict
 from ner.metrics import FMeasureStorage
-from ner.utils import clear_tags
+from ner.utils import clear_for_metrics
 from seqeval.metrics import performance_measure, classification_report, f1_score
 from seqeval.scheme import IOB2
 from tqdm import tqdm
@@ -66,7 +66,7 @@ class Trainer():
 
         self.progress_info = '{:>5s} Loss = {:.5f}, Token F1-score = {:.2%}, Span F1-score = {:.2%}'
 
-    def __step(self, input_ids: torch.Tensor, labels: torch.Tensor, attention_mask: torch.Tensor, masks: List[List[int]],
+    def __step(self, input_ids: torch.Tensor, labels: torch.Tensor, attention_mask: torch.Tensor, words_ids: List[List[int]],
                document_ids: List[int] = None, sentences_ids: List[int] = None,
                document_word_embeddings: Dict = None, word_positions: Dict = None,
                freeze_bert: bool = False):
@@ -95,7 +95,7 @@ class Trainer():
         labels = labels.cpu().numpy()
 
         # clear <PAD>, CLS and SEP tags from both labels and predictions
-        clear_labels, clear_predictions = clear_tags(labels, predictions, self.idx2tag)
+        clear_labels, clear_predictions = clear_for_metrics(labels, predictions, self.idx2tag, words_ids)
 
         iteration_result = performance_measure(clear_labels, clear_predictions)
 
@@ -138,20 +138,20 @@ class Trainer():
                 for batch in self.train_data:
                     tokens = batch[0].to(self.device)
                     tags = batch[1].to(self.device)
-                    masks = batch[2]
-                    attention_mask = batch[3].to(self.device)
+                    attention_mask = batch[2].to(self.device)
+                    words_ids = batch[3]
 
                     # если есть документы, то используем модель, учитывающую контекст документа
                     if self.train_documents:
-                        document_ids = batch[5]
-                        sentences_ids = batch[6]
+                        document_ids = batch[4]
+                        sentences_ids = batch[5]
                         document_word_embeddings, word_positions = self.__get_document_word_vectors(
                             document_ids, self.train_documents)
-                        loss, step_f1 = self.__step(tokens, tags, attention_mask, masks, document_ids,
+                        loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids, document_ids,
                                                     sentences_ids, document_word_embeddings,
                                                     word_positions, freeze_bert)
                     else:
-                        loss, step_f1 = self.__step(tokens, tags, attention_mask, masks, freeze_bert=freeze_bert)
+                        loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids, freeze_bert=freeze_bert)
 
                     epoch_metrics + step_f1
                     epoch_loss += loss.item()
@@ -194,19 +194,19 @@ class Trainer():
                 for batch in self.eval_data:
                     tokens = batch[0].to(self.device)
                     tags = batch[1].to(self.device)
-                    masks = batch[2]
-                    attention_mask = batch[3].to(self.device)
+                    attention_mask = batch[2].to(self.device)
+                    words_ids = batch[3]
 
                     if self.eval_documents:
-                        document_ids = batch[5]
-                        sentences_ids = batch[6]
+                        document_ids = batch[4]
+                        sentences_ids = batch[5]
                         document_word_embeddings, word_positions = self.__get_document_word_vectors(
                             document_ids, self.eval_documents)
-                        loss, step_f1 = self.__step(tokens, tags, attention_mask, masks, document_ids,
+                        loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids, document_ids,
                                                     sentences_ids, document_word_embeddings,
                                                     word_positions)
                     else:
-                        loss, step_f1 = self.__step(tokens, tags, attention_mask, masks)
+                        loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids)
 
                     epoch_metrics + step_f1
                     epoch_loss += loss.item()
@@ -237,19 +237,19 @@ class Trainer():
                 for batch in self.test_data:
                     tokens = batch[0].to(self.device)
                     tags = batch[1].to(self.device)
-                    attention_mask = batch[3].to(self.device)
-                    masks = batch[2]
+                    attention_mask = batch[2].to(self.device)
+                    words_ids = batch[3]
 
                     if self.test_documents:
                         document_ids = batch[5]
                         sentences_ids = batch[6]
                         document_word_embeddings, word_positions = self.__get_document_word_vectors(
                             document_ids, self.test_documents)
-                        loss, step_f1 = self.__step(tokens, tags, attention_mask, masks, document_ids,
+                        loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids, document_ids,
                                                     sentences_ids, document_word_embeddings,
                                                     word_positions)
                     else:
-                        loss, step_f1 = self.__step(tokens, tags, attention_mask, masks)
+                        loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids)
 
                     epoch_metrics + step_f1
                     epoch_loss += loss.item()
