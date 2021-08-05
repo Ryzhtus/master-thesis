@@ -56,6 +56,7 @@ class Trainer():
 
         self.train_loss = []
         self.eval_loss = []
+        self.test_loss = []
 
         self.train_span_f1 = []
         self.eval_span_f1 = []
