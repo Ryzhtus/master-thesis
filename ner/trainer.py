@@ -1,12 +1,13 @@
 import comet_ml
 
-from typing import List, Dict, Sequence
-from ner.metrics import FMeasureStorage, AccuracyStorage
+from typing import List, Dict
+from ner.metrics import FMeasureStorage
 from ner.utils import clear_tags
 from seqeval.metrics import performance_measure, classification_report, f1_score
 from seqeval.scheme import IOB2
 from tqdm import tqdm
 from ner.document import Document
+import matplotlib.pyplot as plt
 
 import torch
 import torch.nn as nn
@@ -55,7 +56,9 @@ class Trainer():
 
         self.train_loss = []
         self.eval_loss = []
-        self.test_loss = []
+
+        self.train_span_f1 = []
+        self.eval_span_f1 = []
 
         self.epoch_labels = []
         self.epoch_predictions = []
@@ -66,6 +69,11 @@ class Trainer():
                document_ids: List[int] = None, sentences_ids: List[int] = None,
                document_word_embeddings: Dict = None, word_positions: Dict = None,
                freeze_bert: bool = False):
+        """
+        Общий метод, используемый для шага обучения, валидации и тестирования.
+        В этом блоке модель делает предсказание по батчу, считается значение функции потерь и полученные предсказания
+        сохраняются в списке, чтобы в конце эпохе честно посчитать метрики по сущносят
+        """
 
         if freeze_bert:
             for param in self.model.bert.parameters():
@@ -104,6 +112,10 @@ class Trainer():
         return loss, iteration_result
 
     def __get_document_word_vectors(self, document_ids: List[int], documents: Document):
+        """
+        Под выключенным градиентом у BERT считаем для каждого документа средние вектора его слов, сохраняем их
+        в словарь
+        """
         for param in self.model.bert.parameters():
             param.requires_grad = False
 
@@ -136,6 +148,7 @@ class Trainer():
                     masks = batch[2]
                     attention_mask = batch[3].to(self.device)
 
+                    # если есть документы, то используем модель, учитывающую контекст документа
                     if self.train_documents:
                         document_ids = batch[5]
                         sentences_ids = batch[6]
@@ -152,9 +165,12 @@ class Trainer():
 
                     self.optimizer.zero_grad()
                     loss.backward()
+
                     if self.clip_grad:
                         nn.utils.clip_grad_norm_(self.model.parameters(), 1)
+
                     self.optimizer.step()
+
                     if self.scheduler:
                         self.scheduler.step()
                     torch.cuda.empty_cache()
@@ -173,6 +189,7 @@ class Trainer():
                 self.experiment.log_metric("Train Precision", epoch_precision)
 
             self.train_loss.append(epoch_loss / len(self.train_data))
+            self.train_span_f1.append(epoch_span_f1_score)
 
     def __eval_epoch(self, name):
         epoch_loss = 0
@@ -215,6 +232,7 @@ class Trainer():
                 self.experiment.log_metric("Validation Precision", epoch_precision)
 
             self.eval_loss.append(epoch_loss / len(self.eval_data))
+            self.eval_span_f1.append(epoch_span_f1_score)
 
     def __test_epoch(self, name: str):
         epoch_loss = 0
@@ -283,3 +301,25 @@ class Trainer():
     def test(self):
         self.__test_epoch('Test :')
         print(classification_report(self.epoch_labels, self.epoch_predictions, scheme=IOB2, digits=4))
+
+    def plot_loss_curve(self):
+        plt.figure(figsize=(14, 7))
+        plt.title('Значения функции потерь для модели {}'.format(type(self.model)))
+        plt.plot([i for i in range(self.params['epochs'])], self.train_loss, label='Train')
+        plt.plot([i for i in range(self.params['epochs'])], self.eval_loss, label='Validation')
+        plt.xticks([i for i in range(self.params['epochs'])])
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss Value')
+        plt.legend()
+        plt.show()
+
+    def plot_score_curve(self):
+        plt.figure(figsize=(14, 7))
+        plt.title('Значения Span F1 для модели {}'.format(type(self.model)))
+        plt.plot([i for i in range(self.params['epochs'])], self.train_span_f1, label='Train')
+        plt.plot([i for i in range(self.params['epochs'])], self.eval_span_f1, label='Validation')
+        plt.xticks([i for i in range(self.params['epochs'])])
+        plt.xlabel('Epochs')
+        plt.ylabel('Span F1 Value')
+        plt.legend()
+        plt.show()
