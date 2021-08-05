@@ -77,7 +77,7 @@ def clear_for_metrics(labels: List[List[int]], predictions: List[List[int]], idx
         clear_predictions = []
 
         # убираем PAD, CLS и SEP токены
-        for idx in range(len(label_list)):
+        for idx in range(len(list(label_list))):
             if label_list[idx] != -100:
                 non_pad_labels.append(idx2tag[label_list[idx]])
                 non_pad_predictions.append(idx2tag[preds_list[idx]])
