@@ -86,18 +86,10 @@ class Trainer():
         else:
             predictions = self.model(input_ids, attention_mask)
 
-        if attention_mask is not None:
-            active_loss = attention_mask.view(-1) == 1
-            active_logits = predictions.view(-1, self.model.classes)
-            active_labels = torch.where(
-                active_loss, labels.view(-1), torch.tensor(self.criterion.ignore_index).type_as(labels)
-            )
-            loss = self.criterion(active_logits, active_labels)
-        else:
-            labels_mask = labels != -100
-            labels_mask = labels_mask.view(-1)
-            labels = torch.where(labels_mask, labels.view(-1), torch.tensor(self.criterion.ignore_index).type_as(labels))
-            loss = self.criterion(predictions.view(-1, predictions.shape[-1]), labels)
+        labels_mask = labels != -100
+        labels_mask = labels_mask.view(-1)
+        labels = torch.where(labels_mask, labels.view(-1), torch.tensor(self.criterion.ignore_index).type_as(labels))
+        loss = self.criterion(predictions.view(-1, predictions.shape[-1]), labels)
 
         predictions = predictions.argmax(dim=2).cpu().numpy()
         labels = labels.cpu().numpy()

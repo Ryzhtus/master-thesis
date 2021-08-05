@@ -1,7 +1,10 @@
+from typing import List, Dict
+
 from ner.reader import ReaderCoNLL, ReaderOntonotes
 from ner.dataset import CoNLLDatasetBERT, CoNLLDatasetT5, SentencesDataset, SentencesPlusDocumentsDataset
 from ner.iterator import DocumentBatchIterator
 from ner.document import Document
+
 from torch.utils.data import DataLoader
 
 
@@ -29,16 +32,16 @@ def create_dataset_and_standard_dataloader(model_name: str, dataset_name: str, f
 def create_dataset_and_document_dataloader(dataset_name: str, filename: str, batch_size: int, shuffle: bool, tokenizer):
     if dataset_name == 'conll':
         reader = ReaderCoNLL(include_document_ids=True)
-        sentences, tags, masks, document_to_sentences, sentence_to_document_to_position = reader.read(filename)
-        dataset = SentencesPlusDocumentsDataset(sentences, tags, masks, document_to_sentences, sentence_to_document_to_position, tokenizer)
-        documents = Document(sentences, document_to_sentences, tokenizer)
+        sentences, labels, _, document2sentences, sentence2position = reader.read(filename)
+        dataset = SentencesPlusDocumentsDataset(sentences, labels, document2sentences, sentence2position, tokenizer)
+        documents = Document(sentences, document2sentences, tokenizer)
         return dataset, documents, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
     if dataset_name == 'ontonotes':
         reader = ReaderOntonotes(include_document_ids=True)
-        sentences, tags, masks, document_to_sentences, sentence_to_document_to_position = reader.read(filename)
-        dataset = SentencesPlusDocumentsDataset(sentences, tags, masks, document_to_sentences, sentence_to_document_to_position, tokenizer)
-        documents = Document(sentences, document_to_sentences, tokenizer)
+        sentences, labels, _, document2sentences, sentence2position = reader.read(filename)
+        dataset = SentencesPlusDocumentsDataset(sentences, labels, document2sentences, sentence2position, tokenizer)
+        documents = Document(sentences, document2sentences, tokenizer)
         return dataset, documents, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
 
@@ -61,6 +64,43 @@ def create_dataset_and_document_level_iterator(dataset_name: str, filename: str,
         data_iterator = DocumentBatchIterator(dataset, document2sentences, shuffle=True)
 
         return dataset, data_iterator
+
+def clear_labels(labels: List[List[int]], predictions: List[List[int]], idx2tag: Dict, words_ids: List[List[int]]):
+    y_true = []
+    y_pred = []
+
+    for label_list, preds_list, word_ids in zip(labels, predictions, words_ids):
+        non_pad_labels = []
+        non_pad_predictions = []
+
+        clear_labels = []
+        clear_predictions = []
+
+        true_tags = label_list != -100
+        # убираем PAD токены
+        for idx in range(len(true_tags)):
+            if true_tags[idx] == True:
+                non_pad_labels.append(idx2tag[label_list[idx]])
+                non_pad_predictions.append(idx2tag[preds_list[idx]])
+
+        # убираем CLS и SEP токены
+        non_pad_labels = non_pad_labels[1: len(non_pad_labels) - 1]
+        non_pad_predictions = non_pad_predictions[1: len(non_pad_predictions) - 1]
+
+        # собираем только тэги, проставленые первому сабтокену слова
+        # добавляем первый тэг по умолчанию
+        clear_labels.append(non_pad_labels[0])
+        clear_predictions.append(non_pad_predictions[0])
+        # если предыдущий индекс слова = текущему, то это тоже слово
+        for subtoken_id in range(1, len(word_ids)):
+            if word_ids[subtoken_id] != word_ids[subtoken_id - 1]:
+                clear_labels.append(non_pad_labels[subtoken_id])
+                clear_predictions.append(non_pad_predictions[subtoken_id])
+
+        y_true.append(clear_labels)
+        y_pred.append(clear_predictions)
+
+    return y_true, y_pred
 
 def clear_tags(labels, predictions, idx2tag):
     y_true = []
