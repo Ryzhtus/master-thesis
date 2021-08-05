@@ -76,16 +76,11 @@ def clear_for_metrics(labels: List[List[int]], predictions: List[List[int]], idx
         clear_labels = []
         clear_predictions = []
 
-        true_tags = label_list != -100
-        # убираем PAD токены
-        for idx in range(len(true_tags)):
-            if true_tags[idx] == True:
+        # убираем PAD, CLS и SEP токены
+        for idx in range(len(label_list)):
+            if label_list[idx] != -100:
                 non_pad_labels.append(idx2tag[label_list[idx]])
                 non_pad_predictions.append(idx2tag[preds_list[idx]])
-
-        # убираем CLS и SEP токены
-        non_pad_labels = non_pad_labels[1: len(non_pad_labels) - 1]
-        non_pad_predictions = non_pad_predictions[1: len(non_pad_predictions) - 1]
 
         # собираем только тэги, проставленые первому сабтокену слова
         # добавляем первый тэг по умолчанию
