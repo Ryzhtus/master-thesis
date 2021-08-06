@@ -1,0 +1,9 @@
+torch==1.9.0
+transformers==4.9.1
+matplotlib==3.4.2
+tqdm==4.61.2
+numpy==1.21.0
+truecase==0.0.14
+nltk==3.6.2
+seqeval
+comet_ml

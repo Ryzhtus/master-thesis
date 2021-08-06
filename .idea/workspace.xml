@@ -5,8 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/CoNLL_BERT_Base.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/ner-with-nonlocal-features.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ner-with-nonlocal-features.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ner/reader.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/reader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.ipynb_checkpoints/CoNLL_BERT_Base_GPU1-checkpoint.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.ipynb_checkpoints/CoNLL_BERT_Base_GPU2-checkpoint.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CoNLL_BERT_Base_GPU1.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CoNLL_BERT_Base_GPU2.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bert_vocab_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/bert_vocab_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,17 +53,18 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
       <recent name="C:\Users\shkun\Documents\Учеба\МФТИ\Диссертация\ner-with-nonlocal-features\data\ontonotes" />
       <recent name="C:\Users\shkun\Documents\Учеба\МФТИ\Диссертация\ner-with-nonlocal-features\data\ontonotes\v3" />
       <recent name="C:\Users\shkun\Documents\Учеба\МФТИ\Диссертация\ner-with-nonlocal-features\data\ontonotes\v2" />
       <recent name="C:\Users\shkun\Documents\Учеба\МФТИ\Диссертация\ner-with-nonlocal-features\ontonotes" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/tests" />
       <recent name="$PROJECT_DIR$/scores" />
       <recent name="$PROJECT_DIR$" />
       <recent name="C:\Users\shkun\Documents\Учеба\МФТИ\Диссертация\ner-with-nonlocal-features\tests" />
       <recent name="C:\Users\shkun\Documents\Учеба\МФТИ\Диссертация\ner-with-nonlocal-features\notebooks" />
-      <recent name="C:\Users\shkun\Documents\Учеба\МФТИ\Диссертация\ner-with-nonlocal-features\data\ontonotes\v1" />
     </key>
   </component>
   <component name="RunManager" selected="Python.run">
@@ -71,7 +81,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/bert_vocab_test.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/bert_vocab_test.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -304,7 +314,8 @@
       <workItem from="1627991910240" duration="7873000" />
       <workItem from="1628063552590" duration="5113000" />
       <workItem from="1628148072351" duration="19002000" />
-      <workItem from="1628234488453" duration="6093000" />
+      <workItem from="1628234488453" duration="8868000" />
+      <workItem from="1628251805203" duration="714000" />
     </task>
     <servers />
   </component>
