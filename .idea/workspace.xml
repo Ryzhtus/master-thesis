@@ -5,17 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/CoNLL_BERT_Base.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/ner-with-nonlocal-features.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ner-with-nonlocal-features.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.ipynb_checkpoints/CoNLL_BERT_Base_GPU1-checkpoint.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.ipynb_checkpoints/CoNLL_BERT_Base_GPU2-checkpoint.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CoNLL_BERT_Base_GPU1.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CoNLL_BERT_Base_GPU2.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bert_vocab_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/bert_vocab_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CoNLL_BERT_Base.ipynb" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -316,6 +306,7 @@
       <workItem from="1628148072351" duration="19002000" />
       <workItem from="1628234488453" duration="8868000" />
       <workItem from="1628251805203" duration="714000" />
+      <workItem from="1628252523814" duration="427000" />
     </task>
     <servers />
   </component>
