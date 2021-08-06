@@ -23,7 +23,7 @@ class BERT(nn.Module):
         self.lstm_hidden_size = lstm_size
 
         self.bert = BertModel.from_pretrained(self.model_name, output_hidden_states=True)
-        self.lstm = nn.LSTM(self.embedding_dim * 2, self.lstm_hidden_size,
+        self.lstm = nn.LSTM(self.embedding_dim, self.lstm_hidden_size,
                             bidirectional=True, num_layers=self.lstm_layers)
         self.linear = nn.Linear(self.embedding_dim, self.classes)
         self.linear_lstm = nn.Linear(self.lstm_hidden_size * 2, self.classes)

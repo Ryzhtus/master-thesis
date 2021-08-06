@@ -65,7 +65,9 @@ def create_dataset_and_document_level_iterator(dataset_name: str, filename: str,
 
         return dataset, data_iterator
 
-def clear_for_metrics(labels: List[List[int]], predictions: List[List[int]], idx2tag: Dict, words_ids: List[List[int]]):
+
+def clear_for_metrics(labels, predictions, idx2tag, words_ids):
+    """Актуальная функция для подготовки тэгов к подсчету метрик на entity-level"""
     y_true = []
     y_pred = []
 
@@ -98,6 +100,8 @@ def clear_for_metrics(labels: List[List[int]], predictions: List[List[int]], idx
     return y_true, y_pred
 
 def clear_tags(labels, predictions, idx2tag):
+    """Функция для отчистки тэгов от PAD, CLS и SEP токенов, и подготовки правильных тэгов и предсказанных
+    в том случае если мы ставим -100 для всех подтокенов слова, кроме первого"""
     y_true = []
     y_pred = []
 

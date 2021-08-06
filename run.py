@@ -10,6 +10,4 @@ train_dataset, train_documents, train_dataloader = create_dataset_and_document_d
 eval_dataset, eval_documents, eval_dataloader = create_dataset_and_document_dataloader('conll', 'data/conll2003/valid.txt', batch_size=BATCH_SIZE, shuffle=False, tokenizer=TOKENIZER)
 test_dataset, test_documents, test_dataloader = create_dataset_and_document_dataloader('conll', 'data/conll2003/test.txt', batch_size=BATCH_SIZE, shuffle=False, tokenizer=TOKENIZER)
 
-print(train_dataset.tag2idx)
-print(eval_dataset.tag2idx)
-print(test_dataset.tag2idx)
+print(next(iter(train_dataloader)))
