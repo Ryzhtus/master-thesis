@@ -12,11 +12,11 @@ def create_dataset_and_standard_dataloader(model_name: str, dataset_name: str, f
                                            shuffle: bool, tokenizer):
     if dataset_name == 'conll':
         reader = ReaderCoNLL()
-        sentences, tags, masks = reader.read(filename)
+        sentences, tags, _ = reader.read(filename)
         if model_name == 'BERT':
-            dataset = CoNLLDatasetBERT(sentences, tags, masks, tokenizer)
+            dataset = CoNLLDatasetBERT(sentences, tags, tokenizer)
         elif model_name == 'T5':
-            dataset = CoNLLDatasetT5(sentences, tags, masks, tokenizer)
+            dataset = CoNLLDatasetT5(sentences, tags, tokenizer)
         else:
             raise ValueError('The model {} name is not valid or this model is not supported.'.format(model_name))
 
