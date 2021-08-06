@@ -5,7 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/CoNLL_BERT_Base.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -306,7 +307,8 @@
       <workItem from="1628148072351" duration="19002000" />
       <workItem from="1628234488453" duration="8868000" />
       <workItem from="1628251805203" duration="714000" />
-      <workItem from="1628252523814" duration="427000" />
+      <workItem from="1628252523814" duration="456000" />
+      <workItem from="1628253275004" duration="19000" />
     </task>
     <servers />
   </component>
