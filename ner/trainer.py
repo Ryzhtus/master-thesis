@@ -246,8 +246,8 @@ class Trainer():
                     words_ids = batch[3]
 
                     if self.test_documents:
-                        document_ids = batch[5]
-                        sentences_ids = batch[6]
+                        document_ids = batch[4]
+                        sentences_ids = batch[5]
                         document_word_embeddings, word_positions = self.__get_document_word_vectors(
                             document_ids, self.test_documents)
                         loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids, document_ids,
