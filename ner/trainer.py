@@ -86,21 +86,13 @@ class Trainer():
         else:
             predictions = self.model(input_ids, attention_mask)
 
-        # сохраняем метки в изначальных размерностях [N, K], чтобы посчитать метрики
-        labels_origin = labels
-        labels_origin = labels_origin.cpu().numpy()
-
-        # изменяем размерности меток, чтобы посчитать loss
-        labels_mask = labels != -100
-        labels_mask = labels_mask.view(-1)
-        labels = torch.where(labels_mask, labels.view(-1), torch.tensor(self.criterion.ignore_index).type_as(labels))
-        loss = self.criterion(predictions.view(-1, predictions.shape[-1]), labels)
+        loss = self.criterion(predictions.view(-1, predictions.shape[-1]), labels.view(-1))
 
         predictions = predictions.argmax(dim=2).cpu().numpy()
         labels = labels.cpu().numpy()
 
         # clear <PAD>, CLS and SEP tags from both labels and predictions
-        clear_labels, clear_predictions = clear_for_metrics(labels_origin, predictions, self.idx2tag, words_ids)
+        clear_labels, clear_predictions = clear_for_metrics(labels, predictions, self.idx2tag, words_ids)
 
         iteration_result = performance_measure(clear_labels, clear_predictions)
 
