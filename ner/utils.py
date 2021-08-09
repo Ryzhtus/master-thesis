@@ -85,14 +85,9 @@ def clear_for_metrics(labels, predictions, idx2tag, words_ids):
                 non_pad_predictions.append(idx2tag[preds_list[idx]])
 
         # собираем только тэги, проставленые первому сабтокену слова
-        # добавляем первый тэг по умолчанию
-        clear_labels.append(non_pad_labels[0])
-        clear_predictions.append(non_pad_predictions[0])
-        # если предыдущий индекс слова = текущему, то это тоже слово
-        for subtoken_id in range(1, len(word_ids)):
-            if word_ids[subtoken_id] != word_ids[subtoken_id - 1]:
-                clear_labels.append(non_pad_labels[subtoken_id])
-                clear_predictions.append(non_pad_predictions[subtoken_id])
+        for word_id in word_ids:
+            clear_labels.append(non_pad_labels[word_id])
+            clear_predictions.append(non_pad_predictions[word_id])
 
         y_true.append(clear_labels)
         y_pred.append(clear_predictions)
