@@ -162,7 +162,7 @@ class SentencesPlusDocumentsDataset(Dataset):
             for i in range(len(subtokens)):
                 tokenized_labels.append(word2tag[word])
 
-            words_ids.append(len(subtokens))
+            words_ids.append(len(tokens))
             tokens.extend(subtokens)
 
         tokens = [self.tokenizer.cls_token] + tokens + [self.tokenizer.sep_token]

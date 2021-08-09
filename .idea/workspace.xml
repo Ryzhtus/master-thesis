@@ -7,7 +7,6 @@
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ner/dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ner/trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/trainer.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -312,7 +311,7 @@
       <workItem from="1628253275004" duration="646000" />
       <workItem from="1628270987655" duration="1052000" />
       <workItem from="1628500982455" duration="238000" />
-      <workItem from="1628509169915" duration="1097000" />
+      <workItem from="1628509169915" duration="1478000" />
     </task>
     <servers />
   </component>
