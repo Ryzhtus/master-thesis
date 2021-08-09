@@ -199,31 +199,56 @@ class DocumentContextBERT(nn.Module):
         self.linear_lstm = nn.Linear(self.lstm_hidden_size, self.classes)
         self.dropout = nn.Dropout(self.dropout_value)
 
-    def get_document_context(self, document, words):
+    def get_document_context(self, document, document_words):
+        """
+        Считаем контекстные вектора для каждого слова в документе
+
+        params: document - токенизированный документ, токены которого переведены в token_ids
+        размер документа (количество предложений в документе, максимальная длина последовательности среди всех
+        предложений)
+
+        params: document_words - словарь вида
+        {Word Id (ключ): {tokens: [список WordPiece токенов слова],
+                          pos: [список словарей, где ключ - номер предлжения (в документе),
+                                                 а значение - позиция его WordPiece токенов в этом предложении]}
+        }
+        Word Id - уникальный номер по документу
+        """
+
+        # посылаем в BERT целый документ
         last_hidden_state = self.bert(document)[0]
 
-        for key in words:
-            current_word = []
-            for pos in words[key]['pos']:
-                sentence_id = pos['sentence_id']
-                if len(pos['ids']) == 1:
-                    position = pos['ids']
-                    current_word.append(last_hidden_state[sentence_id][position])
+        # проходим по каждому слову в документе
+        for key in document_words:
+            context_vectors_for_current_word = []
+            # перебираем все вхождения слова в документ
+            for positions in document_words[key]['pos']:
+                sentence_id = positions['sentence_id']
+                # если слово состоит из одного токена, то в позициях будет только один элемент
+                if len(positions['ids']) == 1:
+                    position = positions['ids']
+                    context_vectors_for_current_word.append(last_hidden_state[sentence_id][position])
+                # если слово состоит из нескольких токенов, то берем позиции первого токена и последнего, и берем slice
                 else:
-                    position_start = pos['ids'][0]
-                    position_end = pos['ids'][-1]
-                    current_word.append(last_hidden_state[sentence_id][position_start: position_end + 1])
+                    position_start = positions['ids'][0]
+                    position_end = positions['ids'][-1]
+                    context_vectors_for_current_word.append(last_hidden_state[sentence_id][position_start: position_end + 1])
 
-            all_context_vectors_of_a_word = torch.stack(current_word, dim=0)
+            # делаем тензор из списка контекстных векторов для слова
+            all_context_vectors_of_a_word = torch.stack(context_vectors_for_current_word, dim=0)
+            # берем среднее по каждому WordPiece токену
             mean_context_vector_of_a_word = torch.mean(all_context_vectors_of_a_word, dim=0)
 
-            words[key]['context_vector'] = mean_context_vector_of_a_word
+            # кладем в изначальный словарь средний контекстный вектор для каждого токена конкретного слова
+            document_words[key]['context_vector'] = mean_context_vector_of_a_word
 
-        return words
+        return document_words
 
     def forward(self, batch, attention_masks, documents_ids, sentences_ids, mean_embeddings_for_batch_documents,
-                sentences_from_documents):
+                word_positions):
         last_hidden_state = self.bert(input_ids=batch, attention_mask=attention_masks)[0]
+
+        # по умолчанию отключаем градиент у копируемого скрытого слоя (если allow_flow_grad=True, то не отключаем)
         if self.allow_flow_grad:
             additional_context = last_hidden_state.clone()
         else:
@@ -231,50 +256,67 @@ class DocumentContextBERT(nn.Module):
             additional_context.requires_grad_(requires_grad=False)
 
         for batch_element_id, tokens in enumerate(batch):
+            # для примера батча получаем номер его документа и номер позиции предложения внутри него
             document_id = documents_ids[batch_element_id]
             sentence_id = sentences_ids[batch_element_id]
 
-            words_from_sentences = sentences_from_documents[document_id][sentence_id]
-            words_from_document = mean_embeddings_for_batch_documents[document_id]
+            # для предложения получаем список вида: {0: [0], 1: [1, 2], 2: [3, 4, 5], 3: [6], ...},
+            # где ключ - номер слова в предложений, значение - позиции его WordPiece токенов в предложении
+            words_from_sentence = word_positions[document_id][sentence_id]
+            # получаем словарь слов с посчитанными усредненными контекстными векторами для каждого слова в документе
+            words_embeddings = mean_embeddings_for_batch_documents[document_id]
 
-            for word in words_from_sentences:
-                word_bpe = words_from_sentences[word]['bpe']
+            for word in words_from_sentence:
+                word_bpe = words_from_sentence[word]['bpe']
 
+                # изначально считаем, что слово встречается не один раз
                 once_seen = False
-                for key in words_from_document:
-                    if words_from_document[key]['bpe'] == word_bpe:
-                        if len(words_from_document[key]['pos']) == 1:
+                for key in words_embeddings:
+                    # нашли слово совпадению WordPiece токенов
+                    if words_embeddings[key]['bpe'] == word_bpe:
+                        # если слово встречается один раз, то мы не берем его средний вектор по документу
+                        if len(words_embeddings[key]['pos']) == 1:
                             once_seen = True
+                        # если более одного раза, то будем менять, поэтому берем его средний вектор
                         else:
-                            context_vector = words_from_document[key]['context_vector']
+                            context_vector = words_embeddings[key]['context_vector']
+                        # ранний выход из цикла, если мы нашли текущее слово
                         break
 
+                # если слово встречается один раз в документе, то ничего не меняем в last_hidden_state по батчу
                 if once_seen == True:
                     pass
                 else:
-                    word_positions = words_from_sentences[word]['positions']
+                    word_positions = words_from_sentence[word]['positions']
 
+                    # если слово не является PAD токеном
                     if word_bpe != '[PAD]':
+                        # если слово из одного токена
                         if len(word_positions) == 1:
                             position = word_positions[0]
                             additional_context[batch_element_id][position] = context_vector
+                        # если слово из нескольких токенов
                         else:
                             for bpe_token_relative_pos, position_in_sentence in enumerate(word_positions):
                                 additional_context[batch_element_id][position_in_sentence] = context_vector[
                                     bpe_token_relative_pos]
                     else:
+                        # если это PAD токен, то берем его первое вхождение в предложение и проставляем его
+                        # средний вектор до конца последовательности
                         for idx in range(word_positions[0], len(tokens)):
                             additional_context[batch_element_id][idx] = context_vector
 
-                        for key in words_from_document:
-                            if words_from_document[key]['bpe'] == ['[SEP]']:
-                                context_vector = words_from_document[key]['context_vector']
+                        # меняем вектор для SEP токена
+                        for key in words_embeddings:
+                            if words_embeddings[key]['bpe'] == ['[SEP]']:
+                                context_vector = words_embeddings[key]['context_vector']
                                 additional_context[batch_element_id][-1] = context_vector
                                 break
 
                     break
 
         additional_context = additional_context.to(self.device)
+        # конкатенируем скрытый слой с батча и тензор с заменой на средние вектора
         hidden_state_with_context = torch.cat((last_hidden_state, additional_context), 2)
 
         if self.use_lstm:
