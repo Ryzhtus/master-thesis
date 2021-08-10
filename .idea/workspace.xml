@@ -7,6 +7,7 @@
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ner/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ner/trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/trainer.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -147,7 +148,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest in t_metrics.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest in /Users/arsenijskunkov/Documents/Mastes Thesis/ner-with-nonlocal-features/t_metrics.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="ner-with-nonlocal-features" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -168,14 +169,14 @@
       <item itemvalue="Python.score_bert_base_linear" />
       <item itemvalue="Python.run" />
       <item itemvalue="Python.bert_vocab_test" />
-      <item itemvalue="Python tests.pytest in t_metrics.py" />
       <item itemvalue="Python.metrics_test" />
+      <item itemvalue="Python tests.pytest in /Users/arsenijskunkov/Documents/Mastes Thesis/ner-with-nonlocal-features/t_metrics.py" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.metrics_test" />
         <item itemvalue="Python.run" />
-        <item itemvalue="Python tests.pytest in t_metrics.py" />
+        <item itemvalue="Python tests.pytest in /Users/arsenijskunkov/Documents/Mastes Thesis/ner-with-nonlocal-features/t_metrics.py" />
         <item itemvalue="Python.bert_vocab_test" />
         <item itemvalue="Python.score_bert_base_linear" />
       </list>
@@ -308,7 +309,7 @@
       <workItem from="1628500982455" duration="238000" />
       <workItem from="1628509169915" duration="7215000" />
       <workItem from="1628585917223" duration="1427000" />
-      <workItem from="1628591160067" duration="5312000" />
+      <workItem from="1628591160067" duration="7022000" />
     </task>
     <servers />
   </component>

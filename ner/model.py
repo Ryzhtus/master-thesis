@@ -297,23 +297,23 @@ class DocumentContextBERT(nn.Module):
                 if once_seen == True:
                     pass
                 else:
-                    word_positions = words_from_sentence[word]['positions']
+                    word_positions_in_sentence = words_from_sentence[word]['positions']
 
                     # если слово не является PAD токеном
                     if word_bpe != '[PAD]':
                         # если слово из одного токена
-                        if len(word_positions) == 1:
-                            position = word_positions[0]
+                        if len(word_positions_in_sentence) == 1:
+                            position = word_positions_in_sentence[0]
                             additional_context[batch_element_id][position] = context_vector
                         # если слово из нескольких токенов
                         else:
-                            for bpe_token_relative_pos, position_in_sentence in enumerate(word_positions):
+                            for bpe_token_relative_pos, position_in_sentence in enumerate(word_positions_in_sentence):
                                 additional_context[batch_element_id][position_in_sentence] = context_vector[
                                     bpe_token_relative_pos]
                     else:
                         # если это PAD токен, то берем его первое вхождение в предложение и проставляем его
                         # средний вектор до конца последовательности
-                        for idx in range(word_positions[0], len(tokens)):
+                        for idx in range(word_positions_in_sentence[0], len(tokens)):
                             additional_context[batch_element_id][idx] = context_vector
 
                         # меняем вектор для SEP токена

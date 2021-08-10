@@ -114,8 +114,7 @@ class Trainer():
             for document_id in set(document_ids):
                 document_word_embeddings[document_id] = self.model.get_document_context(
                     documents[document_id].to(self.device), documents.collect_all_positions_for_each_word(document_id))
-                word_positions[document_id] = documents.get_document_words_by_sentences(
-                    document_id)
+                word_positions[document_id] = documents.get_document_words_by_sentences(document_id)
 
         return document_word_embeddings, word_positions
 
