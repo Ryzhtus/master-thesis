@@ -201,18 +201,20 @@ class DocumentContextBERT(nn.Module):
 
     def get_document_context(self, document, document_words):
         """
-        Считаем контекстные вектора для каждого слова в документе
+        Считаем средние контекстные вектора для каждого слова в документе
 
         params: document - токенизированный документ, токены которого переведены в token_ids
         размер документа (количество предложений в документе, максимальная длина последовательности среди всех
         предложений)
 
         params: document_words - словарь вида
-        {Word Id (ключ): {tokens: [список WordPiece токенов слова],
-                          pos: [список словарей, где ключ - номер предлжения (в документе),
-                                                 а значение - позиция его WordPiece токенов в этом предложении]}
-        }
-        Word Id - уникальный номер по документу
+        {word_id (ключ): {bpe: [список WordPiece токенов слова], pos: [список словарей вида {ids: [int], sentence_id: int}}
+
+        word_id - уникальный номер слова
+        ids - позиции токенов слова в предложении, начиная от 0
+        sentence_id - номер предложения в документе
+
+        т.е связка ids - sentence_id дает информацию о позиции токенов конкретного слова в указанном предложении
         """
 
         # посылаем в BERT целый документ
@@ -260,9 +262,17 @@ class DocumentContextBERT(nn.Module):
             document_id = documents_ids[batch_element_id]
             sentence_id = sentences_ids[batch_element_id]
 
-            # для предложения получаем список вида: {0: [0], 1: [1, 2], 2: [3, 4, 5], 3: [6], ...},
-            # где ключ - номер слова в предложений, значение - позиции его WordPiece токенов в предложении
+            # берем слова из конкретного предложения и их позиции в токенах:
+            # из словаря вида {document_id: {sentence_id: {word_id: {bpe: [], positions: []}}}}
+            # пример:
+            """
+            {0: {0: {0: {'bpe': ['[CLS]'], 'positions': [0]},
+                     1: {'bpe': ['EU'], 'positions': [1]},
+                     2: {'bpe': ['rejects'], 'positions': [2]},
+            """
+
             words_from_sentence = word_positions[document_id][sentence_id]
+
             # получаем словарь слов с посчитанными усредненными контекстными векторами для каждого слова в документе
             words_embeddings = mean_embeddings_for_batch_documents[document_id]
 
