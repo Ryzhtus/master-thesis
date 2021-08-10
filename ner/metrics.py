@@ -1,17 +1,28 @@
+from typing import Dict
+
 from seqeval.metrics import accuracy_score
 
 class FMeasureStorage():
-    def __init__(self):
-        self.true_positive = 0
-        self.false_positive = 0
-        self.true_negative = 0
-        self.false_negative = 0
+    def __init__(self, true_positive: int = 0,
+                 false_positive: int = 0,
+                 true_negative: int = 0,
+                 false_negative: int = 0):
 
-    def __iadd__(self, iteration_result: dict):
+        self.true_positive = true_positive
+        self.false_positive = false_positive
+        self.true_negative = true_negative
+        self.false_negative = false_negative
+
+    def __iadd__(self, iteration_result: Dict[str, int]):
         self.true_positive += iteration_result['TP']
         self.false_positive += iteration_result['FP']
         self.true_negative += iteration_result['TN']
         self.false_negative += iteration_result['FN']
+
+        return FMeasureStorage(self.true_positive,
+                               self.false_positive,
+                               self.true_negative,
+                               self.false_negative)
 
     def print_rates(self):
         print('True Positives {} | False Positives {} | True Negatives {} | False Negatives {}'.format(
