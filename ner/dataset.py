@@ -175,6 +175,47 @@ class SentencesPlusDocumentsDataset(Dataset):
         return torch.LongTensor(tokens_ids), torch.LongTensor(label_ids), torch.LongTensor(attention_mask), \
                words_ids, document_id, sentence_position_in_document
 
+    def split_long_sentence(self, tokens, labels, max_tokens):
+        """Идея следующая: давайте резать предложения так, чтобы в них были исключительно целые слова
+           Мы находим все токены начала слов (в случае BERT - без ##), берем их индексы и находим ближайший
+           такой индекс, чтобы поделить почти по max_tokens т.е ищем такую точку деления,
+           чтобы был min(max_tokens - split_idx)"""
+        tokens_split = []
+        labels_split = []
+
+        while len(tokens) > max_tokens:
+            # находим точки, где можно порезать предложение по словам
+            possible_splits = []
+
+            for token_idx in range(0, len(tokens)):
+                if '##' not in tokens[token_idx]:
+                    possible_splits.append(token_idx)
+
+            # находим наиболее близкую к индексу max_tokens
+            min_distance = float('inf')
+            min_split_idx = 0
+            for split_idx in range(0, len(possible_splits)):
+                distance = abs(max_tokens - possible_splits[split_idx])
+                if distance < min_distance:
+                    min_distance = distance
+                    min_split_idx = split_idx
+
+            # отсекаем слева
+            split_slice = slice(0, min_split_idx)
+
+            tokens_split.append(tokens[split_slice])
+            labels_split.append(labels[split_slice])
+
+            # удаляем то, что отсекли
+            del tokens[split_slice]
+            del labels[split_slice]
+
+            # добавляем остаток
+        tokens_split.append(tokens)
+        labels_split.append(labels)
+
+        return tokens_split, labels_split
+
     def paddings(self, batch):
         tokens, labels, attention_masks, words_ids, document_ids, sentences_ids = list(zip(*batch))
 

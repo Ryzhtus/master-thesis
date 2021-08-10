@@ -7,7 +7,7 @@ class FMeasureStorage():
         self.true_negative = 0
         self.false_negative = 0
 
-    def __add__(self, iteration_result: dict):
+    def __iadd__(self, iteration_result: dict):
         self.true_positive += iteration_result['TP']
         self.false_positive += iteration_result['FP']
         self.true_negative += iteration_result['TN']

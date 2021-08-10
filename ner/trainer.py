@@ -144,7 +144,7 @@ class Trainer():
                     else:
                         loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids, freeze_bert=freeze_bert)
 
-                    epoch_metrics + step_f1
+                    epoch_metrics += step_f1
                     epoch_loss += loss.item()
 
                     self.optimizer.zero_grad()
@@ -199,7 +199,7 @@ class Trainer():
                         else:
                             loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids)
 
-                        epoch_metrics + step_f1
+                        epoch_metrics += step_f1
                         epoch_loss += loss.item()
 
                         progress_bar.update()
@@ -243,7 +243,7 @@ class Trainer():
                         else:
                             loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids)
 
-                        epoch_metrics + step_f1
+                        epoch_metrics += step_f1
                         epoch_loss += loss.item()
 
                         progress_bar.update()
