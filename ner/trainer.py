@@ -180,32 +180,34 @@ class Trainer():
         self.model.eval()
         with self.experiment.validate():
             with tqdm(total=len(self.eval_data)) as progress_bar:
-                with torch.no_grad():
-                    for batch in self.eval_data:
-                        tokens = batch[0].to(self.device)
-                        tags = batch[1].to(self.device)
-                        attention_mask = batch[2].to(self.device)
-                        words_ids = batch[3]
+                for batch in self.eval_data:
+                    tokens = batch[0].to(self.device)
+                    tags = batch[1].to(self.device)
+                    attention_mask = batch[2].to(self.device)
+                    words_ids = batch[3]
 
-                        if self.eval_documents:
-                            document_ids = batch[4]
-                            sentences_ids = batch[5]
-                            document_word_embeddings, word_positions = self.__get_document_word_vectors(
-                                document_ids, self.eval_documents)
+                    if self.eval_documents:
+                        document_ids = batch[4]
+                        sentences_ids = batch[5]
+                        document_word_embeddings, word_positions = self.__get_document_word_vectors(
+                            document_ids, self.eval_documents)
+
+                        with torch.no_grad():
                             loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids, document_ids,
                                                         sentences_ids, document_word_embeddings,
                                                         word_positions)
-                        else:
+                    else:
+                        with torch.no_grad():
                             loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids)
 
-                        epoch_metrics += step_f1
-                        epoch_loss += loss.item()
+                    epoch_metrics += step_f1
+                    epoch_loss += loss.item()
 
-                        progress_bar.update()
-                        progress_bar.set_description(self.progress_info.format(name, loss.item(), 0, 0))
+                    progress_bar.update()
+                    progress_bar.set_description(self.progress_info.format(name, loss.item(), 0, 0))
 
                 epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
-                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions)
+                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions, scheme=IOB2)
                 progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
                                                                        epoch_token_f1_score, epoch_span_f1_score))
 
@@ -224,32 +226,34 @@ class Trainer():
         self.model.eval()
         with self.experiment.test():
             with tqdm(total=len(self.test_data)) as progress_bar:
-                with torch.no_grad():
-                    for batch in self.test_data:
-                        tokens = batch[0].to(self.device)
-                        tags = batch[1].to(self.device)
-                        attention_mask = batch[2].to(self.device)
-                        words_ids = batch[3]
+                for batch in self.test_data:
+                    tokens = batch[0].to(self.device)
+                    tags = batch[1].to(self.device)
+                    attention_mask = batch[2].to(self.device)
+                    words_ids = batch[3]
 
-                        if self.test_documents:
-                            document_ids = batch[4]
-                            sentences_ids = batch[5]
-                            document_word_embeddings, word_positions = self.__get_document_word_vectors(
-                                document_ids, self.test_documents)
+                    if self.test_documents:
+                        document_ids = batch[4]
+                        sentences_ids = batch[5]
+                        document_word_embeddings, word_positions = self.__get_document_word_vectors(
+                            document_ids, self.test_documents)
+
+                        with torch.no_grad():
                             loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids, document_ids,
                                                         sentences_ids, document_word_embeddings,
                                                         word_positions)
-                        else:
+                    else:
+                        with torch.no_grad():
                             loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids)
 
-                        epoch_metrics += step_f1
-                        epoch_loss += loss.item()
+                    epoch_metrics += step_f1
+                    epoch_loss += loss.item()
 
-                        progress_bar.update()
-                        progress_bar.set_description(self.progress_info.format(name, loss.item(), 0, 0))
+                    progress_bar.update()
+                    progress_bar.set_description(self.progress_info.format(name, loss.item(), 0, 0))
 
                 epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
-                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions)
+                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions, scheme=IOB2)
                 progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
                                                                        epoch_token_f1_score, epoch_span_f1_score))
 
