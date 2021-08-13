@@ -64,6 +64,10 @@ class Trainer():
         self.epoch_labels = []
         self.epoch_predictions = []
 
+        # variables for logging eval loss and test loss
+        self.eval_steps = 0
+        self.test_steps = 0
+
         self.progress_info = '{:>5s} Loss = {:.5f}, Token F1-score = {:.2%}, Span F1-score = {:.2%}'
 
     def __step(self, input_ids: torch.Tensor, labels: torch.Tensor, attention_mask: torch.Tensor, words_ids: List[List[int]],
@@ -198,7 +202,8 @@ class Trainer():
                     epoch_metrics += step_f1
                     epoch_loss += loss.item()
                     self.eval_loss.append(loss.item)
-                    self.experiment.log_metric('loss', loss.item())
+                    self.experiment.log_metric('loss', loss.item(), step=self.eval_steps)
+                    self.eval_steps += 1
 
                     progress_bar.update()
                     epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
@@ -240,7 +245,8 @@ class Trainer():
                     epoch_metrics += step_f1
                     epoch_loss += loss.item()
                     self.test_loss.append(loss.item())
-                    self.experiment.log_metric('loss', loss.item())
+                    self.experiment.log_metric('loss', loss.item(), step=self.test_steps)
+                    self.test_steps += 1
 
                     epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
                     epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions, scheme=IOB2)
