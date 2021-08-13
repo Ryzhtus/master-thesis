@@ -130,6 +130,8 @@ class Trainer():
         with self.experiment.train():
             with tqdm(total=len(self.train_data)) as progress_bar:
                 for batch in self.train_data:
+                    self.optimizer.zero_grad()
+
                     tokens = batch[0].to(self.device)
                     tags = batch[1].to(self.device)
                     attention_mask = batch[2].to(self.device)
@@ -151,7 +153,7 @@ class Trainer():
                     epoch_loss += loss.item()
                     self.train_loss.append(loss.item())
 
-                    self.optimizer.zero_grad()
+
                     loss.backward()
 
                     if self.clip_grad:
@@ -248,6 +250,7 @@ class Trainer():
                     self.experiment.log_metric('loss', loss.item(), step=self.test_steps)
                     self.test_steps += 1
 
+                    progress_bar.update()
                     epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
                     epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions, scheme=IOB2)
                     progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
