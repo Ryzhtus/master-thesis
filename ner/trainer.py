@@ -145,6 +145,7 @@ class Trainer():
 
                     epoch_metrics += step_f1
                     epoch_loss += loss.item()
+                    self.train_loss.append(loss.item())
 
                     self.optimizer.zero_grad()
                     loss.backward()
@@ -158,19 +159,13 @@ class Trainer():
                         self.scheduler.step()
 
                     progress_bar.update()
-                    progress_bar.set_description(self.progress_info.format(name, loss.item(), 0, 0))
+                    epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
+                    epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions)
+                    progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
+                                                                           epoch_token_f1_score, epoch_span_f1_score))
 
-                epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
-                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions)
-                progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
-                                                                       epoch_token_f1_score, epoch_span_f1_score))
+                self.experiment.log_metric("Span F1", epoch_span_f1_score)
 
-                self.experiment.log_metric("Train Token F1", epoch_token_f1_score)
-                self.experiment.log_metric("Train Span F1", epoch_span_f1_score)
-                self.experiment.log_metric("Train Recall", epoch_recall)
-                self.experiment.log_metric("Train Precision", epoch_precision)
-
-            self.train_loss.append(epoch_loss / len(self.train_data))
             self.train_span_f1.append(epoch_span_f1_score)
 
     def __eval_epoch(self, name):
@@ -202,21 +197,17 @@ class Trainer():
 
                     epoch_metrics += step_f1
                     epoch_loss += loss.item()
+                    self.eval_loss.append(loss.item)
+                    self.experiment.log_metric('loss', loss.item())
 
                     progress_bar.update()
-                    progress_bar.set_description(self.progress_info.format(name, loss.item(), 0, 0))
+                    epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
+                    epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions, scheme=IOB2)
+                    progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
+                                                                           epoch_token_f1_score, epoch_span_f1_score))
 
-                epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
-                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions, scheme=IOB2)
-                progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
-                                                                       epoch_token_f1_score, epoch_span_f1_score))
+                self.experiment.log_metric("Span F1", epoch_span_f1_score)
 
-                self.experiment.log_metric("Validation Token F1", epoch_token_f1_score)
-                self.experiment.log_metric("Validation Span F1", epoch_span_f1_score)
-                self.experiment.log_metric("Validation Recall", epoch_recall)
-                self.experiment.log_metric("Validation Precision", epoch_precision)
-
-            self.eval_loss.append(epoch_loss / len(self.eval_data))
             self.eval_span_f1.append(epoch_span_f1_score)
 
     def __test_epoch(self, name: str):
@@ -248,21 +239,15 @@ class Trainer():
 
                     epoch_metrics += step_f1
                     epoch_loss += loss.item()
+                    self.test_loss.append(loss.item())
+                    self.experiment.log_metric('loss', loss.item())
 
-                    progress_bar.update()
-                    progress_bar.set_description(self.progress_info.format(name, loss.item(), 0, 0))
+                    epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
+                    epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions, scheme=IOB2)
+                    progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
+                                                                           epoch_token_f1_score, epoch_span_f1_score))
 
-                epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
-                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions, scheme=IOB2)
-                progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
-                                                                       epoch_token_f1_score, epoch_span_f1_score))
-
-                self.experiment.log_metric("Test Token F1", epoch_token_f1_score)
-                self.experiment.log_metric("Test Span F1", epoch_span_f1_score)
-                self.experiment.log_metric("Test Recall", epoch_recall)
-                self.experiment.log_metric("Test Precision", epoch_precision)
-
-            self.test_loss.append(epoch_loss / len(self.test_data))
+                self.experiment.log_metric("Span F1", epoch_span_f1_score)
 
     def fit(self):
         for epoch in range(self.epochs):
@@ -290,8 +275,8 @@ class Trainer():
     def plot_loss_curve(self):
         plt.figure(figsize=(14, 7))
         plt.title('Значения функции потерь для модели {}'.format(type(self.model)))
-        plt.plot([i for i in range(self.params['epochs'])], self.train_loss, label='Train')
-        plt.plot([i for i in range(self.params['epochs'])], self.eval_loss, label='Validation')
+        plt.plot([i for i in range(len(self.train_loss))], self.train_loss, label='Train')
+        plt.plot([i for i in range(len(self.eval_loss))], self.eval_loss, label='Validation')
         plt.xticks([i for i in range(self.params['epochs'])])
         plt.xlabel('Epochs')
         plt.ylabel('Loss Value')
