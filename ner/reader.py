@@ -14,7 +14,7 @@ class ReaderCoNLL():
         for sentence in rows:
             words = [line.split()[0] for line in sentence.splitlines()]
             tags = [line.split()[-1] for line in sentence.splitlines()]
-            sentences.append(truecase_sentence(words))
+            sentences.append(words)
             sentences_tags.append(tags)
 
         return sentences, sentences_tags
@@ -31,6 +31,8 @@ class ReaderCoNLL():
                 documents_tags.append(document_tags)
                 document = []
                 document_tags = []
+                document.append(sentence)
+                document_tags.append(tag)
             else:
                 document.append(sentence)
                 document_tags.append(tag)

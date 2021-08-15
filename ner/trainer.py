@@ -153,7 +153,6 @@ class Trainer():
                     epoch_loss += loss.item()
                     self.train_loss.append(loss.item())
 
-
                     loss.backward()
 
                     if self.clip_grad:
@@ -203,7 +202,7 @@ class Trainer():
 
                     epoch_metrics += step_f1
                     epoch_loss += loss.item()
-                    self.eval_loss.append(loss.item)
+                    self.eval_loss.append(loss.item())
                     self.experiment.log_metric('loss', loss.item(), step=self.eval_steps)
                     self.eval_steps += 1
 
