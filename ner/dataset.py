@@ -117,7 +117,7 @@ class SentencesPlusDocumentsDataset(Dataset):
         self.sentences = sentences
         self.labels = labels
 
-        self.entity_tags = sorted(['X'] + list(set(tag for tag_list in self.labels for tag in tag_list)))
+        self.entity_tags = sorted(list(set(tag for tag_list in self.labels for tag in tag_list)))
         self.tag2idx = {tag: idx for idx, tag in enumerate(self.entity_tags)}
         self.idx2tag = {idx: tag for idx, tag in enumerate(self.entity_tags)}
 
@@ -150,10 +150,7 @@ class SentencesPlusDocumentsDataset(Dataset):
         for word_id, word in enumerate(words):
             subtokens = self.tokenizer.tokenize(word)
             for i in range(len(subtokens)):
-                if i == 0:
-                    tokenized_labels.append(word2tag[word])
-                else:
-                    tokenized_labels.append('X')
+                tokenized_labels.append(word2tag[word])
 
             words_ids.append(len(tokens))
             tokens.extend(subtokens)
@@ -161,7 +158,7 @@ class SentencesPlusDocumentsDataset(Dataset):
         tokens = [self.tokenizer.cls_token] + tokens + [self.tokenizer.sep_token]
         tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
 
-        label_ids = [self.tag2idx['X']] + [self.tag2idx[label] for label in tokenized_labels] + [self.tag2idx['X']]
+        label_ids = [-100] + [self.tag2idx[label] for label in tokenized_labels] + [-100]
 
         attention_mask = [1 for _ in tokens_ids]
 

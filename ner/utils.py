@@ -66,7 +66,7 @@ def create_dataset_and_document_level_iterator(dataset_name: str, filename: str,
         return dataset, data_iterator
 
 
-def clear_for_metrics(labels, predictions, idx2tag, words_ids, ignore_index):
+def clear_for_metrics(labels, predictions, idx2tag, words_ids):
     """Актуальная функция для подготовки тэгов к подсчету метрик на entity-level"""
     y_true = []
     y_pred = []
@@ -80,19 +80,17 @@ def clear_for_metrics(labels, predictions, idx2tag, words_ids, ignore_index):
 
         # убираем PAD, CLS и SEP токены
         for idx in range(len(list(label_list))):
-            if label_list[idx] != ignore_index:
+            if label_list[idx] != -100:
                 non_pad_labels.append(idx2tag[label_list[idx]])
                 non_pad_predictions.append(idx2tag[preds_list[idx]])
 
         # собираем только тэги, проставленые первому сабтокену слова
-        #for word_id in word_ids:
-            #clear_labels.append(non_pad_labels[word_id])
-            #clear_predictions.append(non_pad_predictions[word_id])
+        for word_id in word_ids:
+            clear_labels.append(non_pad_labels[word_id])
+            clear_predictions.append(non_pad_predictions[word_id])
 
-        y_true.append(non_pad_labels)
-        y_pred.append(non_pad_predictions)
-        #y_true.append(clear_labels)
-        #y_pred.append(clear_predictions)
+        y_true.append(clear_labels)
+        y_pred.append(clear_predictions)
 
     return y_true, y_pred
 
