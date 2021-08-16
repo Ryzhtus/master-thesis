@@ -1,7 +1,7 @@
 from typing import List, Dict
 
 from ner.reader import ReaderCoNLL, ReaderOntonotes
-from ner.dataset import CoNLLDatasetBERT, CoNLLDatasetT5, SentencesDataset, SentencesPlusDocumentsDataset
+from ner.dataset import CoNLLDatasetBERT, CoNLLDatasetT5, SentencesPlusDocumentsDataset, SentencesDataset
 from ner.iterator import DocumentBatchIterator
 from ner.document import Document
 
@@ -80,17 +80,19 @@ def clear_for_metrics(labels, predictions, idx2tag, words_ids):
 
         # убираем PAD, CLS и SEP токены
         for idx in range(len(list(label_list))):
-            if label_list[idx] != -100:
+            if label_list[idx] != idx2tag['X']:
                 non_pad_labels.append(idx2tag[label_list[idx]])
                 non_pad_predictions.append(idx2tag[preds_list[idx]])
 
         # собираем только тэги, проставленые первому сабтокену слова
-        for word_id in word_ids:
-            clear_labels.append(non_pad_labels[word_id])
-            clear_predictions.append(non_pad_predictions[word_id])
+        #for word_id in word_ids:
+            #clear_labels.append(non_pad_labels[word_id])
+            #clear_predictions.append(non_pad_predictions[word_id])
 
-        y_true.append(clear_labels)
-        y_pred.append(clear_predictions)
+        y_true.append(non_pad_labels)
+        y_pred.append(non_pad_predictions)
+        #y_true.append(clear_labels)
+        #y_pred.append(clear_predictions)
 
     return y_true, y_pred
 

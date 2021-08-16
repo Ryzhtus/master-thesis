@@ -117,7 +117,7 @@ class SentencesPlusDocumentsDataset(Dataset):
         self.sentences = sentences
         self.labels = labels
 
-        self.entity_tags = sorted(list(set(tag for tag_list in self.labels for tag in tag_list)))
+        self.entity_tags = sorted(['X'] + list(set(tag for tag_list in self.labels for tag in tag_list)))
         self.tag2idx = {tag: idx for idx, tag in enumerate(self.entity_tags)}
         self.idx2tag = {idx: tag for idx, tag in enumerate(self.entity_tags)}
 
@@ -158,59 +158,18 @@ class SentencesPlusDocumentsDataset(Dataset):
         tokens = [self.tokenizer.cls_token] + tokens + [self.tokenizer.sep_token]
         tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
 
-        label_ids = [-100] + [self.tag2idx[label] for label in tokenized_labels] + [-100]
+        label_ids = [self.tag2idx['X']] + [self.tag2idx[label] for label in tokenized_labels] + [self.tag2idx['X']]
 
         attention_mask = [1 for _ in tokens_ids]
 
         return torch.LongTensor(tokens_ids), torch.LongTensor(label_ids), torch.LongTensor(attention_mask), \
                words_ids, document_id, sentence_position_in_document
 
-    def split_long_sentence(self, tokens, labels, max_tokens):
-        """Идея следующая: давайте резать предложения так, чтобы в них были исключительно целые слова
-           Мы находим все токены начала слов (в случае BERT - без ##), берем их индексы и находим ближайший
-           такой индекс, чтобы поделить почти по max_tokens т.е ищем такую точку деления,
-           чтобы был min(max_tokens - split_idx)"""
-        tokens_split = []
-        labels_split = []
-
-        while len(tokens) > max_tokens:
-            # находим точки, где можно порезать предложение по словам
-            possible_splits = []
-
-            for token_idx in range(0, len(tokens)):
-                if '##' not in tokens[token_idx]:
-                    possible_splits.append(token_idx)
-
-            # находим наиболее близкую к индексу max_tokens
-            min_distance = float('inf')
-            min_split_idx = 0
-            for split_idx in range(0, len(possible_splits)):
-                distance = abs(max_tokens - possible_splits[split_idx])
-                if distance < min_distance:
-                    min_distance = distance
-                    min_split_idx = split_idx
-
-            # отсекаем слева
-            split_slice = slice(0, min_split_idx)
-
-            tokens_split.append(tokens[split_slice])
-            labels_split.append(labels[split_slice])
-
-            # удаляем то, что отсекли
-            del tokens[split_slice]
-            del labels[split_slice]
-
-            # добавляем остаток
-        tokens_split.append(tokens)
-        labels_split.append(labels)
-
-        return tokens_split, labels_split
-
     def paddings(self, batch):
         tokens, labels, attention_masks, words_ids, document_ids, sentences_ids = list(zip(*batch))
 
         tokens = pad_sequence(tokens, batch_first=True, padding_value=0)
-        labels = pad_sequence(labels, batch_first=True, padding_value=-100)
+        labels = pad_sequence(labels, batch_first=True, padding_value=self.tag2idx['X'])
         attention_masks = pad_sequence(attention_masks, batch_first=True, padding_value=0)
 
         return tokens, labels, attention_masks, words_ids, document_ids, sentences_ids

@@ -6,7 +6,6 @@ from transformers import BertTokenizer
 TOKENIZER = BertTokenizer.from_pretrained('bert-base-cased', do_lower_case=False)
 BATCH_SIZE = 32
 
-reader = ReaderCoNLL(include_document_ids=True)
-sentences, labels, _, document2sentences, sentence2position = reader.read('data/conll2003/valid.txt')
+train_dataset, train_documents, train_dataloader = create_dataset_and_document_dataloader('conll', 'data/conll2003/train.txt', 32, True, TOKENIZER)
 
-print(len(document2sentences))
+print(train_dataset.idx2tag)
