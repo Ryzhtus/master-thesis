@@ -150,7 +150,10 @@ class SentencesPlusDocumentsDataset(Dataset):
         for word_id, word in enumerate(words):
             subtokens = self.tokenizer.tokenize(word)
             for i in range(len(subtokens)):
-                tokenized_labels.append(word2tag[word])
+                if i == 0:
+                    tokenized_labels.append(word2tag[word])
+                else:
+                    tokenized_labels.append('X')
 
             words_ids.append(len(tokens))
             tokens.extend(subtokens)
