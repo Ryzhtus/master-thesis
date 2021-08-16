@@ -96,7 +96,8 @@ class Trainer():
         labels = labels.cpu().numpy()
 
         # clear <PAD>, CLS and SEP tags from both labels and predictions
-        clear_labels, clear_predictions = clear_for_metrics(labels, predictions, self.idx2tag, words_ids)
+        clear_labels, clear_predictions = clear_for_metrics(labels, predictions, self.idx2tag, words_ids,
+                                                            self.criterion.ignore_index)
 
         iteration_result = performance_measure(clear_labels, clear_predictions)
 

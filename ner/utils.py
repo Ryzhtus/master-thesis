@@ -66,7 +66,7 @@ def create_dataset_and_document_level_iterator(dataset_name: str, filename: str,
         return dataset, data_iterator
 
 
-def clear_for_metrics(labels, predictions, idx2tag, words_ids):
+def clear_for_metrics(labels, predictions, idx2tag, words_ids, ignore_index):
     """Актуальная функция для подготовки тэгов к подсчету метрик на entity-level"""
     y_true = []
     y_pred = []
@@ -80,7 +80,7 @@ def clear_for_metrics(labels, predictions, idx2tag, words_ids):
 
         # убираем PAD, CLS и SEP токены
         for idx in range(len(list(label_list))):
-            if label_list[idx] != idx2tag['X']:
+            if label_list[idx] != ignore_index:
                 non_pad_labels.append(idx2tag[label_list[idx]])
                 non_pad_predictions.append(idx2tag[preds_list[idx]])
 
