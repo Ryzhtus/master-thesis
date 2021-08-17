@@ -1,7 +1,7 @@
 from typing import List, Dict
 
 from ner.reader import ReaderCoNLL, ReaderOntonotes
-from ner.dataset import CoNLLDatasetBERT, CoNLLDatasetT5, SentencesPlusDocumentsDataset, SentencesDataset
+from ner.dataset import CoNLLDatasetBERT, CoNLLDatasetT5, SentencesPlusDocumentsDataset, SentencesDataset, ChunksPlusDocumentsDataset
 from ner.iterator import DocumentBatchIterator
 from ner.document import Document
 
@@ -42,6 +42,23 @@ def create_dataset_and_document_dataloader(dataset_name: str, filename: str, bat
         sentences, labels, _, document2sentences, sentence2position = reader.read(filename)
         dataset = SentencesPlusDocumentsDataset(sentences, labels, document2sentences, sentence2position, tokenizer)
         documents = Document(sentences, document2sentences, tokenizer)
+        return dataset, documents, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
+
+
+def create_chunk_dataset_and_document_dataloader(dataset_name: str, filename: str, seq_length: int, batch_size: int,
+                                                 shuffle: bool, tokenizer):
+    if dataset_name == 'conll':
+        reader = ReaderCoNLL(include_document_ids=True)
+        sentences, labels, _, document2sentences, sentence2position = reader.read(filename)
+        dataset = ChunksPlusDocumentsDataset(sentences, labels, seq_length, document2sentences, sentence2position, tokenizer)
+        documents = Document(dataset.chunks, dataset.document2chunk, tokenizer, seq_length)
+        return dataset, documents, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
+
+    if dataset_name == 'ontonotes':
+        reader = ReaderOntonotes(include_document_ids=True)
+        sentences, labels, _, document2sentences, sentence2position = reader.read(filename)
+        dataset = ChunksPlusDocumentsDataset(sentences, labels, seq_length, document2sentences, sentence2position, tokenizer)
+        documents = Document(dataset.chunks, dataset.document2chunk, tokenizer, seq_length)
         return dataset, documents, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
 

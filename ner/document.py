@@ -1,10 +1,20 @@
+from typing import List
+
 import torch
 from torch.utils.data import Dataset
 
+from transformers import PreTrainedTokenizer
+
+
 class Document(Dataset):
-    def __init__(self, sentences, document2sentences, tokenizer):
+    def __init__(self, sentences: List[int],
+                       document2sentences: dict,
+                       tokenizer: PreTrainedTokenizer,
+                       max_sequence_length: int = 128):
+
         self.sentences = sentences
         self.document2sentences = document2sentences
+        self.max_sequence_length = max_sequence_length
         self.documents = [[self.sentences[sentence_id] for sentence_id in self.document2sentences[document_id]]
                           for document_id in self.document2sentences.keys()]
         self.tokenizer = tokenizer
@@ -27,12 +37,12 @@ class Document(Dataset):
 
             document_ids.append(tokens)
 
-        max_length = len(max(document_ids, key=lambda x: len(x)))
+        # max_length = len(max(document_ids, key=lambda x: len(x)))
 
         for sentence_id, tokens in enumerate(document_ids):
-            if len(tokens) < max_length:
-                difference = max_length - len(tokens)
-                tokens += [self.tokenizer.pad_token] * difference
+            if len(tokens) < self.max_sequence_length:
+                difference = self.max_sequence_length - len(tokens)
+                tokens += [self.tokenizer.pad_token] * (difference - 2)
 
             tokens = [self.tokenizer.cls_token] + tokens + [self.tokenizer.sep_token]
             tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
