@@ -40,12 +40,12 @@ class Document(Dataset):
         # max_length = len(max(document_ids, key=lambda x: len(x)))
 
         for sentence_id, tokens in enumerate(document_ids):
-            if len(tokens) < self.max_sequence_length:
-                difference = self.max_sequence_length - len(tokens)
-                tokens += [self.tokenizer.pad_token] * (difference - 2)
-
             tokens = [self.tokenizer.cls_token] + tokens + [self.tokenizer.sep_token]
             tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
+
+            if len(tokens) < self.max_sequence_length:
+                difference = self.max_sequence_length - len(tokens)
+                tokens += [self.tokenizer.pad_token] * difference
 
             document_ids[sentence_id] = torch.LongTensor(tokens_ids).unsqueeze(0)
 

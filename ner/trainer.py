@@ -25,7 +25,6 @@ class Trainer():
                  eval_documents: Document,
                  test_documents: Document,
                  tag2idx: dict, idx2tag: dict,
-                 scheme,
                  device):
         self.model = model
         self.params = params
@@ -67,8 +66,6 @@ class Trainer():
         # variables for logging eval loss and test loss
         self.eval_steps = 0
         self.test_steps = 0
-
-        self.scheme = scheme
 
         self.progress_info = '{:>5s} Loss = {:.5f}, Token F1-score = {:.2%}, Span F1-score = {:.2%}'
 
@@ -166,12 +163,11 @@ class Trainer():
                         self.scheduler.step()
 
                     progress_bar.update()
-                    progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
-                                                                           0, 0))
+                    progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data), 0, 0))
 
                 progress_bar.update()
                 epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
-                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions, scheme=self.scheme)
+                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions)
                 progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
                                                                        epoch_token_f1_score, epoch_span_f1_score))
                 self.experiment.log_metric("Span F1", epoch_span_f1_score)
@@ -217,7 +213,7 @@ class Trainer():
 
                 progress_bar.update()
                 epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
-                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions, scheme=self.scheme)
+                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions)
                 progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
                                                                        epoch_token_f1_score, epoch_span_f1_score))
                 self.experiment.log_metric("Span F1", epoch_span_f1_score)
@@ -263,7 +259,7 @@ class Trainer():
 
                 progress_bar.update()
                 epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
-                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions, scheme=self.scheme)
+                epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions)
                 progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
                                                                        epoch_token_f1_score, epoch_span_f1_score))
                 self.experiment.log_metric("Span F1", epoch_span_f1_score)
@@ -289,7 +285,7 @@ class Trainer():
 
     def test(self):
         self.__test_epoch('Test :')
-        print(classification_report(self.epoch_labels, self.epoch_predictions, scheme=IOB2, digits=4))
+        print(classification_report(self.epoch_labels, self.epoch_predictions, digits=4))
 
     def plot_loss_curve(self):
         plt.figure(figsize=(14, 7))
