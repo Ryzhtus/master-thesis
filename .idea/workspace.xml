@@ -6,10 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ner/dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ner/document.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/document.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ner/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/conll2003/test.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/conll2003/train.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/conll2003/valid.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ner/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ner/trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/trainer.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -321,7 +322,9 @@
       <workItem from="1629055213702" duration="2216000" />
       <workItem from="1629098964158" duration="5664000" />
       <workItem from="1629126953946" duration="10000" />
-      <workItem from="1629188863572" duration="8614000" />
+      <workItem from="1629188863572" duration="8850000" />
+      <workItem from="1629203692119" duration="1311000" />
+      <workItem from="1629236494685" duration="2810000" />
     </task>
     <servers />
   </component>
