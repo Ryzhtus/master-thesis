@@ -37,13 +37,13 @@ class Document(Dataset):
 
             document_ids.append(tokens)
 
-        # max_length = len(max(document_ids, key=lambda x: len(x)))
+        max_length = len(max(document_ids, key=lambda x: len(x))) + 2
 
         for sentence_id, tokens in enumerate(document_ids):
             tokens = [self.tokenizer.cls_token] + tokens + [self.tokenizer.sep_token]
 
-            if len(tokens) < self.max_sequence_length:
-                difference = self.max_sequence_length - len(tokens)
+            if len(tokens) < max_length:
+                difference = max_length - len(tokens)
                 tokens += [self.tokenizer.pad_token] * difference
 
             tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
