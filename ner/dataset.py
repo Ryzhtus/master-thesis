@@ -177,10 +177,10 @@ class SentencesPlusDocumentsDataset(Dataset):
 
 class ChunksPlusDocumentsDataset(Dataset):
     def __init__(self, sentences: List[List[str]], labels: List[List[str]], max_sequence_length: int,
-                 document2sentences: dict, sentence2position: dict, tokenizer: PreTrainedTokenizer):
+                 document2sentences: dict, sentence2position: dict, tokenizer: PreTrainedTokenizer, model_name: str):
         self.sentences = sentences
         self.labels = labels
-
+        self.model_name = model_name
         self.max_sequence_length = max_sequence_length
 
         self.entity_tags = sorted(list(set(tag for tag_list in self.labels for tag in tag_list)))
@@ -232,8 +232,13 @@ class ChunksPlusDocumentsDataset(Dataset):
             words_ids.append(len(tokens))
             tokens.extend(subtokens)
 
-        tokens = [self.tokenizer.cls_token] + tokens + [self.tokenizer.sep_token]
-        tokens = tokens + [self.tokenizer.pad_token] * (self.max_sequence_length - len(tokens))
+        if self.model_name == 'Bert':
+            tokens = [self.tokenizer.cls_token] + tokens + [self.tokenizer.sep_token]
+            tokens = tokens + [self.tokenizer.pad_token] * (self.max_sequence_length - len(tokens))
+        elif self.model_name == 'T5':
+            tokens = tokens + [self.tokenizer.eos_token]
+            tokens = tokens + [self.tokenizer.pad_token] * (self.max_sequence_length - len(tokens))
+
         tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
 
         label_ids = [-100] + [self.tag2idx[label] for label in tokenized_labels] + [-100]
