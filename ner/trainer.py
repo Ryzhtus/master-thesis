@@ -208,13 +208,13 @@ class Trainer():
                     self.eval_steps += 1
 
                     progress_bar.update()
-                    progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
+                    progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.eval_data),
                                                                            0, 0))
 
                 progress_bar.update()
                 epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
                 epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions)
-                progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
+                progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.eval_data),
                                                                        epoch_token_f1_score, epoch_span_f1_score))
                 self.experiment.log_metric("Span F1", epoch_span_f1_score)
 
@@ -254,13 +254,13 @@ class Trainer():
                     self.test_steps += 1
 
                     progress_bar.update()
-                    progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
+                    progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.test_data),
                                                                            0, 0))
 
                 progress_bar.update()
                 epoch_token_f1_score, epoch_precision, epoch_recall = epoch_metrics.report()
                 epoch_span_f1_score = f1_score(self.epoch_labels, self.epoch_predictions)
-                progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.train_data),
+                progress_bar.set_description(self.progress_info.format(name, epoch_loss / len(self.test_data),
                                                                        epoch_token_f1_score, epoch_span_f1_score))
                 self.experiment.log_metric("Span F1", epoch_span_f1_score)
 
