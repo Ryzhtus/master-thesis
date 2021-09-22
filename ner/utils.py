@@ -45,12 +45,12 @@ def create_dataset_and_document_dataloader(dataset_name: str, filename: str, bat
         return dataset, documents, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
 
-def create_chunk_dataset_and_document_dataloader(dataset_name: str, filename: str, seq_length: int, batch_size: int,
+def create_chunk_dataset_and_document_dataloader(dataset_name: str, filename: str, model_name: str, seq_length: int, batch_size: int,
                                                  shuffle: bool, tokenizer):
     if dataset_name == 'conll':
         reader = ReaderCoNLL(include_document_ids=True)
         sentences, labels, _, document2sentences, sentence2position = reader.read(filename)
-        dataset = ChunksPlusDocumentsDataset(sentences, labels, seq_length, document2sentences, sentence2position, tokenizer)
+        dataset = ChunksPlusDocumentsDataset(sentences, labels, seq_length, document2sentences, sentence2position, tokenizer, model_name)
         documents = Document(dataset.chunks, dataset.document2chunk, tokenizer, seq_length)
         return dataset, documents, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
