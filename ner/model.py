@@ -1,9 +1,10 @@
+from attention import BigBirdAttention
+
 import torch
 import torch.nn as nn
 
-from transformers import BertModel, T5EncoderModel
+from transformers import BertModel, T5EncoderModel, BigBirdConfig
 from nltk.corpus import stopwords
-
 
 class BERT(nn.Module):
     def __init__(self, model_name: str, classes: int, dropout_value: float = 0.1,
@@ -67,6 +68,77 @@ class T5(nn.Module):
     def forward(self, input_ids, attention_masks=None):
         last_hidden_state = self.t5(input_ids=input_ids, attention_mask=attention_masks)[0]
         predictions = self.linear(last_hidden_state)
+
+        return predictions
+
+
+class BertSelfOutput(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.dense = nn.Linear(768, 768)
+        self.LayerNorm = nn.LayerNorm(768, eps=1e-12)
+        self.dropout = nn.Dropout(0.1)
+
+    def forward(self, hidden_states):
+        hidden_states = self.dense(hidden_states)
+        hidden_states = self.dropout(hidden_states)
+        hidden_states = self.LayerNorm(hidden_states)
+        return hidden_states
+
+
+class LongAttentionBERT(nn.Module):
+    def __init__(self, model_name: str, classes: int, big_bird_config=None, dropout_value: float = 0.1,
+                 use_lstm: bool = False, lstm_layers: int = 1, lstm_size: int = 768):
+        super(LongAttentionBERT, self).__init__()
+        self.model_name = model_name
+        self.big_bird_config = big_bird_config
+        self.output = BertSelfOutput()
+
+        if self.model_name == 'bert-base-cased':
+            self.embedding_dim = 768
+        elif self.model_name == 'bert-large-cased':
+            self.embedding_dim = 1024
+        else:
+            raise ValueError('Model name is not valid.')
+
+        self.classes = classes
+        self.dropout_value = dropout_value
+        self.use_lstm = use_lstm
+        self.lstm_layers = lstm_layers
+        self.lstm_hidden_size = lstm_size
+
+        self.sparse_attention = BigBirdAttention(config=self.big_bird_config)
+
+        self.bert = BertModel.from_pretrained(self.model_name, output_hidden_states=True)
+        self.lstm = nn.LSTM(self.embedding_dim, self.lstm_hidden_size // 2,
+                            bidirectional=True, num_layers=self.lstm_layers)
+        self.linear = nn.Linear(self.embedding_dim, self.classes)
+        self.linear_lstm = nn.Linear(self.lstm_hidden_size, self.classes)
+        self.dropout = nn.Dropout(self.dropout_value)
+
+    def forward(self, input_ids, attention_mask=None):
+        hidden_states = self.bert(input_ids=input_ids, attention_mask=attention_mask)[2]
+
+        if self.use_lstm:
+            predictions = self.lstm(hidden_states[-1])[0]
+            predictions = self.dropout(predictions)
+            predictions = self.linear_lstm(predictions)
+        else:
+            # выравниваем каждый слой в hidden_states в 1 ряд [num_layers, batch_size * seqlen, embedding_dim]
+            hidden_state_one_row = torch.stack(
+                [torch.cat(torch.tensor_split(hidden_state, sections=hidden_state.shape[0]), dim=1).squeeze() for
+                 hidden_state in hidden_states])
+            attention_mask_one_row = torch.cat(torch.tensor_split(attention_mask, sections=attention_mask.shape[0]),
+                                               dim=1).squeeze()
+            # last_hidden_state.shape[0] вместо BatchSize, потому что последний батч может быть остатком от деления и != BatchSize
+            attention_output = self.sparse_attention(hidden_state_one_row)[
+                0]  # , attention_mask=attention_mask_one_row)[0]
+            # на выходе получаем [num_layers, batch_size * seqlen, embedding_dim], берем последний слой
+            # размера [batch_size * seqlen, embedding_dim] и превращаем его в [1, batch_size * seqlen, embedding_dim]
+            output = self.output(attention_output)[-1].unsqueeze(0)
+            # превращаем этот hidden_state в размерность батча [batch_size, seq_len, embedding_dim]
+            batch_output = torch.cat(torch.tensor_split(output, sections=hidden_states[-1].shape[0], dim=1), dim=0)
+            predictions = self.linear(batch_output)
 
         return predictions
 
