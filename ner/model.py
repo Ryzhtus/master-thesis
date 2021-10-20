@@ -1,4 +1,4 @@
-from attention import BigBirdAttention
+from big_bird_attention import BigBirdAttention
 
 import torch
 import torch.nn as nn
@@ -32,8 +32,8 @@ class BERT(nn.Module):
         self.linear_lstm = nn.Linear(self.lstm_hidden_size, self.classes)
         self.dropout = nn.Dropout(self.dropout_value)
 
-    def forward(self, input_ids, attention_mask=None):
-        last_hidden_state = self.bert(input_ids=input_ids, attention_mask=attention_mask)[0]
+    def forward(self, input_ids, attention_mask=None, position_ids=None):
+        last_hidden_state = self.bert(input_ids=input_ids, attention_mask=attention_mask, position_ids=position_ids)[0]
 
         if self.use_lstm:
             predictions = self.lstm(last_hidden_state)[0]
@@ -116,8 +116,8 @@ class LongAttentionBERT(nn.Module):
         self.linear_lstm = nn.Linear(self.lstm_hidden_size, self.classes)
         self.dropout = nn.Dropout(self.dropout_value)
 
-    def forward(self, input_ids, attention_mask=None):
-        hidden_states = self.bert(input_ids=input_ids, attention_mask=attention_mask)[2]
+    def forward(self, input_ids, attention_mask=None, position_ids=None):
+        hidden_states = self.bert(input_ids=input_ids, attention_mask=attention_mask, position_ids=position_ids)[2]
 
         if self.use_lstm:
             predictions = self.lstm(hidden_states[-1])[0]
@@ -131,8 +131,7 @@ class LongAttentionBERT(nn.Module):
             attention_mask_one_row = torch.cat(torch.tensor_split(attention_mask, sections=attention_mask.shape[0]),
                                                dim=1).squeeze()
             # last_hidden_state.shape[0] вместо BatchSize, потому что последний батч может быть остатком от деления и != BatchSize
-            attention_output = self.sparse_attention(hidden_state_one_row)[
-                0]  # , attention_mask=attention_mask_one_row)[0]
+            attention_output = self.sparse_attention(hidden_state_one_row)[0]  # , attention_mask=attention_mask_one_row)[0]
             # на выходе получаем [num_layers, batch_size * seqlen, embedding_dim], берем последний слой
             # размера [batch_size * seqlen, embedding_dim] и превращаем его в [1, batch_size * seqlen, embedding_dim]
             output = self.output(attention_output)[-1].unsqueeze(0)

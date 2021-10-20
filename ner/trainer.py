@@ -69,7 +69,8 @@ class Trainer():
 
         self.progress_info = '{:>5s} Loss = {:.5f}, Token F1-score = {:.2%}, Span F1-score = {:.2%}'
 
-    def __step(self, input_ids: torch.Tensor, labels: torch.Tensor, attention_mask: torch.Tensor, words_ids: List[List[int]],
+    def __step(self, input_ids: torch.Tensor, labels: torch.Tensor, attention_mask: torch.Tensor,
+               position_ids: torch.Tensor, words_ids: List[List[int]],
                document_ids: List[int] = None, sentences_ids: List[int] = None,
                document_word_embeddings: Dict = None, word_positions: Dict = None,
                freeze_bert: bool = False):
@@ -84,10 +85,10 @@ class Trainer():
                 param.requires_grad = False
 
         if document_ids and sentences_ids and document_word_embeddings and word_positions:
-            predictions = self.model(input_ids, attention_mask, document_ids, sentences_ids, document_word_embeddings,
+            predictions = self.model(input_ids, attention_mask, position_ids, document_ids, sentences_ids, document_word_embeddings,
                                      word_positions)
         else:
-            predictions = self.model(input_ids, attention_mask)
+            predictions = self.model(input_ids, attention_mask, position_ids)
 
         loss = self.criterion(predictions.view(-1, predictions.shape[-1]), labels.view(-1))
 
@@ -134,7 +135,8 @@ class Trainer():
                     tokens = batch[0].to(self.device)
                     tags = batch[1].to(self.device)
                     attention_mask = batch[2].to(self.device)
-                    words_ids = batch[3]
+                    position_ids = batch[3].to(self.device)
+                    words_ids = batch[4]
 
                     # если есть документы, то используем модель, учитывающую контекст документа
                     if self.train_documents:
@@ -142,11 +144,11 @@ class Trainer():
                         sentences_ids = batch[5]
                         document_word_embeddings, word_positions = self.__get_document_word_vectors(
                             document_ids, self.train_documents)
-                        loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids, document_ids,
+                        loss, step_f1 = self.__step(tokens, tags, attention_mask, position_ids, words_ids, document_ids,
                                                     sentences_ids, document_word_embeddings,
                                                     word_positions, freeze_bert)
                     else:
-                        loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids, freeze_bert=freeze_bert)
+                        loss, step_f1 = self.__step(tokens, tags, attention_mask, position_ids, words_ids, freeze_bert=freeze_bert)
 
                     epoch_metrics += step_f1
                     epoch_loss += loss.item()
@@ -185,7 +187,8 @@ class Trainer():
                     tokens = batch[0].to(self.device)
                     tags = batch[1].to(self.device)
                     attention_mask = batch[2].to(self.device)
-                    words_ids = batch[3]
+                    position_ids = batch[3].to(self.device)
+                    words_ids = batch[4]
 
                     if self.eval_documents:
                         document_ids = batch[4]
@@ -194,12 +197,12 @@ class Trainer():
                             document_ids, self.eval_documents)
 
                         with torch.no_grad():
-                            loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids, document_ids,
+                            loss, step_f1 = self.__step(tokens, tags, attention_mask, position_ids, words_ids, document_ids,
                                                         sentences_ids, document_word_embeddings,
                                                         word_positions)
                     else:
                         with torch.no_grad():
-                            loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids)
+                            loss, step_f1 = self.__step(tokens, tags, attention_mask, position_ids, words_ids)
 
                     epoch_metrics += step_f1
                     epoch_loss += loss.item()
@@ -231,7 +234,8 @@ class Trainer():
                     tokens = batch[0].to(self.device)
                     tags = batch[1].to(self.device)
                     attention_mask = batch[2].to(self.device)
-                    words_ids = batch[3]
+                    position_ids = batch[3].to(self.device)
+                    words_ids = batch[4]
 
                     if self.test_documents:
                         document_ids = batch[4]
@@ -240,12 +244,12 @@ class Trainer():
                             document_ids, self.test_documents)
 
                         with torch.no_grad():
-                            loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids, document_ids,
+                            loss, step_f1 = self.__step(tokens, tags, attention_mask, position_ids, words_ids, document_ids,
                                                         sentences_ids, document_word_embeddings,
                                                         word_positions)
                     else:
                         with torch.no_grad():
-                            loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids)
+                            loss, step_f1 = self.__step(tokens, tags, attention_mask, position_ids, words_ids)
 
                     epoch_metrics += step_f1
                     epoch_loss += loss.item()

@@ -217,6 +217,8 @@ class ChunksPlusDocumentsDataset(Dataset):
         labels = self.chunks_labels[item]
         document_id = self.chunk2document[item]
         sentence_position_in_document = self.chunk2position[item]['sentence_pos_id']
+        position_ids = [pos_id for pos_id in range(document_id * self.max_sequence_length,
+                                                   (document_id * self.max_sequence_length) + self.max_sequence_length)]
 
         word2tag = dict(zip(words, labels))
 
@@ -247,7 +249,7 @@ class ChunksPlusDocumentsDataset(Dataset):
         attention_mask = [1 for _ in tokens_ids]
 
         return torch.LongTensor(tokens_ids), torch.LongTensor(label_ids), torch.LongTensor(attention_mask), \
-               words_ids, document_id, sentence_position_in_document
+               torch.LongTensor(position_ids), words_ids, document_id, sentence_position_in_document
 
     def chunk_reindex(self):
         chunk_id = 0  # общий номер чанка в датасете
