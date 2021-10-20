@@ -1,9 +1,8 @@
 from typing import List, Dict
 
 from ner.reader import ReaderCoNLL, ReaderOntonotes
-from ner.dataset import CoNLLDatasetBERT, CoNLLDatasetT5, SentencesPlusDocumentsDataset, SentencesDataset, ChunksPlusDocumentsDataset
+from ner.dataset import CoNLLDatasetBERT, CoNLLDatasetT5, ChunksPlusDocumentsDataset
 from ner.iterator import DocumentBatchIterator
-from ner.document import Document
 
 from torch.utils.data import DataLoader
 
@@ -29,58 +28,19 @@ def create_dataset_and_standard_dataloader(model_name: str, dataset_name: str, f
         return dataset, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
 
-def create_dataset_and_document_dataloader(dataset_name: str, filename: str, batch_size: int, shuffle: bool, tokenizer):
-    if dataset_name == 'conll':
-        reader = ReaderCoNLL(include_document_ids=True)
-        sentences, labels, _, document2sentences, sentence2position = reader.read(filename)
-        dataset = SentencesPlusDocumentsDataset(sentences, labels, document2sentences, sentence2position, tokenizer)
-        documents = Document(sentences, document2sentences, tokenizer)
-        return dataset, documents, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
-
-    if dataset_name == 'ontonotes':
-        reader = ReaderOntonotes(include_document_ids=True)
-        sentences, labels, _, document2sentences, sentence2position = reader.read(filename)
-        dataset = SentencesPlusDocumentsDataset(sentences, labels, document2sentences, sentence2position, tokenizer)
-        documents = Document(sentences, document2sentences, tokenizer)
-        return dataset, documents, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
-
-
 def create_chunk_dataset_and_document_dataloader(dataset_name: str, filename: str, model_name: str, seq_length: int, batch_size: int,
                                                  shuffle: bool, tokenizer):
     if dataset_name == 'conll':
         reader = ReaderCoNLL(include_document_ids=True)
         sentences, labels, _, document2sentences, sentence2position = reader.read(filename)
         dataset = ChunksPlusDocumentsDataset(sentences, labels, seq_length, document2sentences, sentence2position, tokenizer, model_name)
-        documents = Document(dataset.chunks, dataset.document2chunk, tokenizer, seq_length)
-        return dataset, documents, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
+        return dataset, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
     if dataset_name == 'ontonotes':
         reader = ReaderOntonotes(include_document_ids=True)
         sentences, labels, _, document2sentences, sentence2position = reader.read(filename)
         dataset = ChunksPlusDocumentsDataset(sentences, labels, seq_length, document2sentences, sentence2position, tokenizer)
-        documents = Document(dataset.chunks, dataset.document2chunk, tokenizer, seq_length)
-        return dataset, documents, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
-
-
-def create_dataset_and_document_level_iterator(dataset_name: str, filename: str, group_documents: bool,
-                                               batch_size: int, tokenizer):
-    if dataset_name == 'conll':
-        reader = ReaderCoNLL(include_document_ids=True)
-        sentences, tags, masks, document2sentences = reader.read(filename)
-        dataset = SentencesDataset(sentences, tags, masks, tokenizer)
-        documents = Document(sentences, document2sentences, tokenizer)
-        data_iterator = DocumentBatchIterator(dataset, document2sentences, group_documents=group_documents,
-                                              batch_size=batch_size, shuffle=True)
-
-        return dataset, documents, data_iterator
-
-    if dataset_name == 'ontonotes':
-        reader = ReaderOntonotes(include_document_ids=True)
-        sentences, tags, masks, document2sentences = reader.read(filename)
-        dataset = SentencesDataset(sentences, tags, masks, tokenizer)
-        data_iterator = DocumentBatchIterator(dataset, document2sentences, shuffle=True)
-
-        return dataset, data_iterator
+        return dataset, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
 
 def clear_for_metrics(labels, predictions, idx2tag, words_ids):
@@ -110,80 +70,3 @@ def clear_for_metrics(labels, predictions, idx2tag, words_ids):
         y_pred.append(clear_predictions)
 
     return y_true, y_pred
-
-def clear_tags(labels, predictions, idx2tag):
-    """Функция для отчистки тэгов от PAD, CLS и SEP токенов, и подготовки правильных тэгов и предсказанных
-    в том случае если мы ставим -100 для всех подтокенов слова, кроме первого"""
-    y_true = []
-    y_pred = []
-
-    for label_list, preds_list in zip(labels, predictions):
-        true_tags = label_list != -100
-
-        clear_labels = []
-        clear_predictions = []
-        for idx in range(len(true_tags)):
-            if true_tags[idx] == True:
-                clear_labels.append(idx2tag[label_list[idx]])
-                clear_predictions.append(idx2tag[preds_list[idx]])
-
-        y_true.append(clear_labels)
-        y_pred.append(clear_predictions)
-
-    return y_true, y_pred
-
-def clear_tags_old(labels, predictions, masks, idx2tag, batch_element_length):
-    """ this function removes <PAD>, CLS and SEP tags at each sentence
-        and convert both ids of tags and batch elements to SeqEval input format
-        [[first sentence tags], [second sentence tags], ..., [last sentence tags]]"""
-
-    clear_labels = []
-    clear_predictions = []
-    masked_true_labels = []
-    masked_pred_labels = []
-
-    sentence_labels = []
-    sentence_predictions = []
-    sentence_true_labels_mask = []
-    sentence_pred_labels_mask = []
-
-    sentence_length = 0
-
-    for idx in range(len(labels)):
-        if labels[idx] != 0:
-            sentence_labels.append(idx2tag[labels[idx]])
-            sentence_predictions.append(idx2tag[predictions[idx]])
-            if masks[idx] == 1:
-                sentence_true_labels_mask.append(idx2tag[labels[idx]])
-                sentence_pred_labels_mask.append(idx2tag[predictions[idx]])
-            sentence_length += 1
-
-            if sentence_length == batch_element_length:
-                # not including the 0 and the last element of list, because of CLS and SEP tokens
-                clear_labels.append(sentence_labels[1: len(sentence_labels) - 1])
-                clear_predictions.append(sentence_predictions[1: len(sentence_predictions) - 1])
-                masked_true_labels.append(sentence_true_labels_mask[1: len(sentence_true_labels_mask) - 1])
-                masked_pred_labels.append(sentence_pred_labels_mask[1: len(sentence_pred_labels_mask) - 1])
-                sentence_labels = []
-                sentence_predictions = []
-                sentence_true_labels_mask = []
-                sentence_pred_labels_mask = []
-                sentence_length = 0
-        else:
-            if sentence_labels:
-                clear_labels.append(sentence_labels[1: len(sentence_labels) - 1])
-                clear_predictions.append(sentence_predictions[1: len(sentence_predictions) - 1])
-                masked_true_labels.append(sentence_true_labels_mask[1: len(sentence_true_labels_mask) - 1])
-                masked_pred_labels.append(sentence_pred_labels_mask[1: len(sentence_pred_labels_mask) - 1])
-                sentence_labels = []
-                sentence_predictions = []
-                sentence_true_labels_mask = []
-                sentence_pred_labels_mask = []
-            else:
-                pass
-
-    masked_true_labels = [element for element in masked_true_labels if element != []]
-    masked_pred_labels = [element for element in masked_pred_labels if element != []]
-    repeated_entities_labels = {'true': masked_true_labels, 'pred': masked_pred_labels}
-
-    return clear_labels, clear_predictions, repeated_entities_labels

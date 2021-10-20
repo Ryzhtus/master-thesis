@@ -6,9 +6,48 @@
   <component name="ChangeListManager">
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ner/dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/dataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CoNLL_BERT_Base.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/NER_BERT_Lightning.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ner/big_bird_attention.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/attention.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ner/document.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ner/longformer_attention.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ner/metrics.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/ner/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ner/trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/trainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ner/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/.ipynb_checkpoints/CoNLL BERT Base Context CoNLL GPU1-checkpoint.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/.ipynb_checkpoints/CoNLL BERT Base Context GPU1-checkpoint.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/.ipynb_checkpoints/CoNLL BERT Base Context GPU2-checkpoint.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/.ipynb_checkpoints/CoNLL BERT Base Context OntoNotes GPU1-checkpoint.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/.ipynb_checkpoints/CoNLL BERT Large Context GPU2-Last-Epoch-LSMT-checkpoint.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/CoNLL BERT Base Context CoNLL GPU1.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/CoNLL BERT Base Context GPU1.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/CoNLL BERT Base Context GPU2.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/CoNLL BERT Base Context OntoNotes GPU1.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/CoNLL BERT Large Context GPU2-Last-Epoch-LSMT.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/Experiments-Document-Level-NER-with-Nonlocal-Features-BERT-CoNLL.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/NER-with-Nonlocal-Features-BERT-CoNLL.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/NER-with-Nonlocal-Features-BERT-OntoNotes.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/dev/NER-BERT-Baseline-Test.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/dev/NER-BERT-Baseline.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/results_conll.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/results_conll_full_document_context.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/results_ontonotes.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/run.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scores/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scores/score_bert_base_linear.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/bert_vocab_test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/document_per_batch_hist.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/document_per_batch_hist_after.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/document_per_batch_not_shuffle_standard_dataloader.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/documents_in_batch_distribution.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/length_per_document_hist.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/ontonotes_test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_document_iterator.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_iterator.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_repeated_entities_conll.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_repeated_entities_ontonotes.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -331,7 +370,7 @@
       <workItem from="1632303700695" duration="1343000" />
       <workItem from="1632334911840" duration="1073000" />
       <workItem from="1634714852579" duration="1105000" />
-      <workItem from="1634716438857" duration="1173000" />
+      <workItem from="1634716438857" duration="5657000" />
     </task>
     <servers />
   </component>
