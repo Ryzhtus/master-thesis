@@ -312,13 +312,13 @@ class ChunksPlusDocumentsDataset(Dataset):
                 chunk_local_id += 1
 
     def paddings(self, batch):
-        tokens, labels, attention_masks, words_ids, document_ids, sentences_ids = list(zip(*batch))
+        tokens, labels, attention_masks, position_ids, words_ids, document_ids, sentences_ids = list(zip(*batch))
 
         tokens = pad_sequence(tokens, batch_first=True, padding_value=0)
         labels = pad_sequence(labels, batch_first=True, padding_value=-100)
         attention_masks = pad_sequence(attention_masks, batch_first=True, padding_value=0)
 
-        return tokens, labels, attention_masks, words_ids, document_ids, sentences_ids
+        return tokens, labels, attention_masks, position_ids, words_ids, document_ids, sentences_ids
 
 
 class SentencesDataset(Dataset):
