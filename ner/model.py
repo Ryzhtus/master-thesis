@@ -128,8 +128,7 @@ class LongAttentionBERT(nn.Module):
             hidden_state_one_row = torch.stack(
                 [torch.cat(torch.tensor_split(hidden_state, sections=hidden_state.shape[0]), dim=1).squeeze() for
                  hidden_state in hidden_states])
-            attention_mask_one_row = torch.cat(torch.tensor_split(attention_mask, sections=attention_mask.shape[0]),
-                                               dim=1).squeeze()
+            attention_mask_one_row = torch.cat(torch.tensor_split(attention_mask, sections=attention_mask.shape[0]), dim=1).squeeze()
             # last_hidden_state.shape[0] вместо BatchSize, потому что последний батч может быть остатком от деления и != BatchSize
             attention_output = self.sparse_attention(hidden_state_one_row)[0]  # , attention_mask=attention_mask_one_row)[0]
             # на выходе получаем [num_layers, batch_size * seqlen, embedding_dim], берем последний слой
