@@ -5,14 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="78b09a70-77d4-4556-93b9-3ec2fd043977" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/ner/longformer_attention.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/ner-with-nonlocal-features.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ner-with-nonlocal-features.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ner/attention.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/big_bird_attention.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ner/dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/dataset.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ner/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ner/trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/ner/trainer.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -334,7 +328,8 @@
       <workItem from="1629358357145" duration="1661000" />
       <workItem from="1632303700695" duration="1343000" />
       <workItem from="1632334911840" duration="1073000" />
-      <workItem from="1634714852579" duration="1058000" />
+      <workItem from="1634714852579" duration="1105000" />
+      <workItem from="1634716438857" duration="76000" />
     </task>
     <servers />
   </component>

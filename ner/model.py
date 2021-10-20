@@ -1,4 +1,4 @@
-from big_bird_attention import BigBirdAttention
+from ner.big_bird_attention import BigBirdAttention
 
 import torch
 import torch.nn as nn
