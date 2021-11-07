@@ -180,10 +180,11 @@ class ChunksPlusDocumentsDataset(Dataset):
         label_ids = [-100] + [self.tag2idx[label] for label in tokenized_labels] + [-100]
         label_ids = label_ids + [-100] * (self.max_sequence_length - len(label_ids))
 
-        attention_mask = [1 for _ in tokens_ids]
+        attention_mask = [0 if token == 0 else 1 for token in tokens_ids]
 
         return torch.LongTensor(tokens_ids), torch.LongTensor(label_ids), torch.LongTensor(attention_mask), \
-               words_ids, document_id, sentence_position_in_document
+               words_ids #, document_id, sentence_position_in_document 
+               # в данной версии модели 2 последних переменных не нужны, но оставлены для совместимости
 
     def chunk_reindex(self):
         chunk_id = 0  # общий номер чанка в датасете
