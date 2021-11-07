@@ -39,7 +39,7 @@ def create_chunk_dataset_and_document_dataloader(dataset_name: str, filename: st
     if dataset_name == 'ontonotes':
         reader = ReaderOntonotes(include_document_ids=True)
         sentences, labels, _, document2sentences, sentence2position = reader.read(filename)
-        dataset = ChunksPlusDocumentsDataset(sentences, labels, seq_length, document2sentences, sentence2position, tokenizer)
+        dataset = ChunksPlusDocumentsDataset(sentences, labels, seq_length, document2sentences, sentence2position, tokenizer, model_name)
         return dataset, DataLoader(dataset, batch_size, shuffle=shuffle, collate_fn=dataset.paddings)
 
 
