@@ -54,7 +54,7 @@ class Trainer():
         сохраняются в списке, чтобы в конце эпохе честно посчитать метрики по сущносят
         """
 
-        predictions = self.model(input_ids, attention_mask)
+        predictions = self.model(input_ids=input_ids, attention_mask=attention_mask)
 
         loss = self.criterion(predictions.view(-1, predictions.shape[-1]), labels.view(-1))
 
@@ -83,7 +83,7 @@ class Trainer():
                     attention_mask = batch[2].to(self.device)
                     words_ids = batch[3]
 
-                    loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids)
+                    loss = self.__step(tokens, tags, attention_mask, words_ids)
 
                     epoch_loss += loss.item()
                     loss.backward()
@@ -117,7 +117,7 @@ class Trainer():
                         attention_mask = batch[2].to(self.device)
                         words_ids = batch[3]
 
-                        loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids)
+                        loss = self.__step(tokens, tags, attention_mask, words_ids)
 
                         epoch_loss += loss.item()
 
@@ -142,7 +142,7 @@ class Trainer():
                         attention_mask = batch[2].to(self.device)
                         words_ids = batch[3]
 
-                        loss, step_f1 = self.__step(tokens, tags, attention_mask, words_ids)
+                        loss = self.__step(tokens, tags, attention_mask, words_ids)
 
                         epoch_loss += loss.item()
 
