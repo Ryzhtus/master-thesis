@@ -1,67 +1,88 @@
+from re import sub
 import torch 
 
 from torch.utils.data import Dataset
 from torch.nn.utils.rnn import pad_sequence
 from transformers import PreTrainedTokenizer
 
-from ner_lightning.reader import Document
-
 class ChunksDataset(Dataset):
-    def __init__(self, documents: list[Document], max_sequence_length: int, tokenizer: PreTrainedTokenizer):
-        self.documents = documents
-        self.sentences = [sentence for document in self.documents for sentence in document]
+    def __init__(self, sentences: list[list[str]], 
+                       labels: list[list[str]], 
+                       max_sequence_length: int,
+                       document2sentences: dict, 
+                       sentence2position: dict, 
+                       tokenizer: PreTrainedTokenizer):
 
+        self.sentences = sentences
+        self.labels = labels
         self.max_sequence_length = max_sequence_length
-        
-        self.entity_tags = sorted(list(set(word.label for sentence in self.sentences for word in sentence)))
+
+        self.entity_tags = sorted(list(set(tag for tag_list in self.labels for tag in tag_list)))
         self.tag2idx = {tag: idx for idx, tag in enumerate(self.entity_tags)}
         self.idx2tag = {idx: tag for idx, tag in enumerate(self.entity_tags)}
 
+        # словарь, где по номеру документа получаем номера всех его предложений относительно корпуса
+        self.document2sentences = document2sentences
+        # словарь, в котором по общему номеру предложения (относительно корпуса) можно получить номер документа,
+        # которому он принадлежит и его порядковый номер в этом документе
+        self.sentence2position = sentence2position
+        # словарь, где по номеру предложения получаем номер документа, в котором оно находится
+        self.sentence2document = {sentence_id: document_id for document_id in self.document2sentences.keys()
+                                  for sentence_id in self.document2sentences[document_id]}
+
         self.tokenizer = tokenizer
 
+        # инициализируем индексы и хранение чанков текста
+        self.chunks = []
+        self.chunks_labels = []
+
+        self.chunk2document = {}
+        self.document2chunk = {document_id: [] for document_id in self.document2sentences.keys()}
+        self.chunk2position = {}
+
         # превращаем предложения в чанки (режем по длине
-        #self.chunk_reindex()
+        self.chunk_reindex()
 
     def __len__(self):
         return len(self.sentences)
 
     def __getitem__(self, item):
-        sentence = self.sentences[item]
+        words = self.chunks[item]
+        labels = self.chunks_labels[item]
+        document_id = self.chunk2document[item]
+        sentence_position_in_document = self.chunk2position[item]['sentence_pos_id']
 
-        tokenized_words = []
+        word2tag = dict(zip(words, labels))
+
+        tokens = []
+        words_ids = []
         tokenized_labels = []
-        tokenized_words_features = []
-        words_ids = [] # индексы начала слов в субтокенах
 
-        for word in sentence:
+        for word in words:
             subtokens = self.tokenizer.tokenize(word)
-        
+
             for idx, _ in enumerate(subtokens):
                 if idx == 0:
-                    tokenized_labels.append(self.tag2idx(word.label))
+                    tokenized_labels.append(word2tag[word])
                 else:
                     tokenized_labels.append(-100)
 
-                tokenized_words_features.append(word.feature_vector())
+            words_ids.append(len(tokens))
+            tokens.extend(subtokens)
 
-            # добавляем новый индекс для следующего слова
-            # ПЕРЕПРОВЕРИТЬ ЭТОТ ПУНКТ
-            words_ids.append(len(tokenized_words))
-            # добавляем субтокены/токены в общий список
-            tokenized_words.extend(subtokens)
-
-        tokens = [self.tokenizer.cls_token] + tokenized_words + [self.tokenizer.sep_token]
+        tokens = [self.tokenizer.cls_token] + tokens + [self.tokenizer.sep_token]
         tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
-        
-        label_ids = [-100] + tokenized_labels + [-100]
+
+        label_ids = [-100] + [self.tag2idx[label] if label != -100 else -100 for label in tokenized_labels] + [-100]
         
         attention_mask = [1] * len(tokens_ids)
 
-        return torch.LongTensor(tokens_ids), torch.LongTensor(label_ids), torch.LongTensor(attention_mask), torch.LongTensor(tokenized_words_features), \
-               words_ids
+        return torch.LongTensor(tokens_ids), torch.LongTensor(label_ids), torch.LongTensor(attention_mask), \
+               words_ids #, document_id, sentence_position_in_document 
+               # в данной версии модели 2 последних переменных не нужны, но оставлены для совместимости
 
     def chunk_reindex(self):
-        chunk_id = 0  # общий номер чанка в датасете 
+        chunk_id = 0  # общий номер чанка в датасете
         chunk_local_id = 0  # номер чанка в документе
         previous_document_id = 0  # номер документа
 

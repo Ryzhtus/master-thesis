@@ -2,6 +2,7 @@
 /data/ontonotes.rar
 /.ipynb_checkpoints/
 /ner/__pycache__
+/ner_lightning/__pycache__
 /.DS_Store
 /data/.DS_Store
 /.vscode/
