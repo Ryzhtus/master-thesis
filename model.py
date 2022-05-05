@@ -14,7 +14,7 @@ class Classifier(nn.Module):
         if self.features:
             self.bilstm = nn.LSTM(input_size=self.hidden_size + 1, hidden_size=256, bidirectional=True, batch_first=True)
         else:
-            self.bilstm = nn.LSTM(input_size=self.hidden_size + 1, hidden_size=256, bidirectional=True, batch_first=True)
+            self.bilstm = nn.LSTM(input_size=self.hidden_size, hidden_size=256, bidirectional=True, batch_first=True)
         
         self.classifier = nn.Linear(256 * 2, self.classes)
 
@@ -30,7 +30,7 @@ class Baseline(BertPreTrainedModel):
         super(Baseline, self).__init__(config)
 
         self.bert = BertModel(config)
-        self.classes = 73
+        self.classes = 17
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.classification_head = Classifier(features=False, hidden_size=config.hidden_size, classes=self.classes)
         self.init_weights()
@@ -48,7 +48,7 @@ class BERT(BertPreTrainedModel):
         super(BERT, self).__init__(config)
 
         self.bert = BertModel(config)
-        self.classes = 73
+        self.classes = 17
         self.hidden_size = config.hidden_size
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.classification_head = Classifier(features=True, hidden_size=config.hidden_size, classes=self.classes)

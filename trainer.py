@@ -12,7 +12,7 @@ class LightningBert(LightningModule):
         super().__init__()
         # model
         self.model = model
-        self.num_labels = 73
+        self.num_labels = 17
         self.scheme = scheme
         self.rdf = rdf
 
@@ -25,6 +25,9 @@ class LightningBert(LightningModule):
         
         self.test_epoch_labels = []
         self.test_epoch_predictions = []
+
+        self.predict_epoch_labels = []
+        self.predict_epoch_predictions = []
 
         self.train_dataset = train
         self.valid_dataset = valid
@@ -141,6 +144,9 @@ class LightningBert(LightningModule):
         elif mode == 'test':
             self.test_epoch_labels += clear_labels
             self.test_epoch_predictions += clear_predictions
+        elif mode == "predict":
+            self.predict_epoch_labels += clear_labels
+            self.predict_epoch_predictions += clear_predictions
 
         return loss
 
@@ -235,6 +241,25 @@ class LightningBert(LightningModule):
             print(classification_report(self.test_epoch_labels, self.test_epoch_predictions, digits=4, mode='strict', scheme=self.scheme))
         else:
             print(classification_report(self.test_epoch_labels, self.test_epoch_predictions, digits=4))
+    
+    def predict_step(self, batch, _):
+        if self.rdf:
+            input_ids, labels, attention_mask, words_ids, is_wordpiece_mask, sentence_chunks = batch
+        else:
+            input_ids = batch["input_ids"]
+            labels = batch["labels"]
+            attention_mask = batch["attention_masks"]
+            wordpiece_mask = batch["wordpiece_masks"]
+
+        if self.params["add_features"]:
+            features = batch["features"]
+            loss = self.__step(input_ids, labels, attention_mask, wordpiece_mask, 'predict', features=features)
+        else:
+            loss = self.__step(input_ids, labels, attention_mask, wordpiece_mask, 'predict')
+
+        preds = (self.predict_epoch_predictions, self.predict_epoch_labels)
+
+        return preds
 
     def train_dataloader(self):
         return torch.utils.data.DataLoader(self.train_dataset, 

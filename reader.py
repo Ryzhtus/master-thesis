@@ -185,8 +185,6 @@ class Document():
             sentence.sentence_id = sentence_id
             sentence.document_id = self.document_id
 
-        # self.__collect_capitalization_features()
-
     def __len__(self):
         return len(self.sentences)
 
@@ -249,7 +247,7 @@ class ReaderCoNLL():
         self.tokenizer = tokenizer
         self.max_length_in_tokens = max_length_in_tokens
 
-    def __parse(self, filename: str):
+    def __parse(self, filename: str, is_diagnostic_set: bool = False):
         rows = open(filename, 'r').read().strip().split("\n\n")
         sentences = []
         documents = []
@@ -259,34 +257,54 @@ class ReaderCoNLL():
 
         for sentence in tqdm.tqdm(rows):       
             for line in sentence.splitlines():
-                token = line.split()[0]
-                label = line.split()[-1]       
+                if is_diagnostic_set:
+                    token = line.split()[0]
+                    label = line.split()[1]
+                else:
+                    token = line.split()[0]
+                    label = line.split()[-1]       
+                
                 word = Word(token, label)
 
                 if token == "-DOCSTART-":
                     if document_id == -1:
                         document_id += 1
                     else:
-                        self.documents.append(Document(sentences, document_id))
+                        splitted_sentences = self.__split_sentence(sentences)
+                        self.documents.append(Document(splitted_sentences, document_id))
                         document_id += 1
                         sentences = []
                     
                 document_sentence.append(word)
-            
-            sentence_text = " ".join([word.token for word in document_sentence])
-            tokenized_text = self.tokenizer(sentence_text)
-            
-            if len(tokenized_text.input_ids) > self.max_length_in_tokens:
-                pass
 
             sentences.append(Sentence(document_sentence))
             document_sentence = []
 
         # don't forget to add the last document (because there is no -DOCSTART- tag in the ned of a file)
-        self.documents.append(Document(sentences, document_id))
+        splitted_sentences = self.__split_sentence(sentences)
+        self.documents.append(Document(splitted_sentences, document_id))
         # self.__compute_tf_ifd()
 
         return self.documents
+
+    def __split_sentence(self, original_sentences: list[Sentence]) -> list[Sentence]:
+        splitted_sentences = []
+
+        for sentence in original_sentences:
+            tokenized_text = self.tokenizer._tokenizer.encode(sentence.text)
+
+            if len(tokenized_text) > self.max_length_in_tokens:
+                split_id = tokenized_text.token_to_word(self.max_length_in_tokens // 2)
+
+                sentence_a = Sentence(sentence[:split_id])
+                sentence_b = Sentence(sentence[split_id:])
+
+                splitted_sentences.append(sentence_a)
+                splitted_sentences.append(sentence_b)
+            else:
+                splitted_sentences.append(sentence)
+
+        return splitted_sentences
 
     def __compute_tf_ifd(self) -> None:
         document_texts = [document.document_text for document in self.documents]
@@ -308,10 +326,11 @@ class ReaderCoNLL():
                     else:
                         word.features["tfidf"] = 0
 
-    def parse(self, filename: str, fit_vectorizer: bool = False) -> list[Document]:
+    def parse(self, filename: str, fit_vectorizer: bool = False, is_diagnostic_set: bool = False) -> list[Document]:
         self.documents = []
         self.fit_vectorizer = fit_vectorizer
-        return self.__parse(filename)
+        return self.__parse(filename, is_diagnostic_set)
+
 
 class ReaderOntonotes():
     def __init__(self, tokenizer: BertTokenizer, max_length_in_tokens: int = 128) -> None:
